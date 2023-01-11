@@ -19,6 +19,17 @@ router.get('/all', async (req, res) => {
     }
 })
 
+router.get('/test', async (req, res) => {
+    try{
+        
+        const data = await Recipe.find();
+        res.json(data)
+    }
+    catch(error){
+        res.status(500).json({message: error.message})
+    }
+})
+
 // Search for recipe by title
 router.get('/search', async (req, res) => {
     try{
