@@ -1,0 +1,4 @@
+pm2 info index
+pm2 list
+pm2 stop index
+pm2 restart index
