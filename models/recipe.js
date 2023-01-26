@@ -16,10 +16,18 @@ const recipeSchema = new mongoose.Schema({
         required: false,
         type: [String]
     },
+    allergens: {
+        type: [String],
+        required: false
+    },
     photos : {
         required: false,
         type: [String]
     },
+    instructions : {
+        required: false,
+        type: String 
+    }
 }, {
     collection : "recipes"
 });

@@ -7,6 +7,10 @@ const userSchema = new mongoose.Schema({
         type : String,
         required : true
     },
+    jwt : {
+        type : String,
+        required : true
+    },
     restrictions : {
         type : [String],
         required : false
@@ -14,7 +18,8 @@ const userSchema = new mongoose.Schema({
     email : {
         type : String,
         required : false
-    }
+    },
+    
 
 
 }, {

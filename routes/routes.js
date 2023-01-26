@@ -44,6 +44,13 @@ router.get('/search', async (req, res) => {
     }
 })
 
+
+router.post('/login', async (req, res) => {
+    console.log(req.body["user"]);
+    res.status(200).json('success')
+
+})
+
 //Post Method
 router.post('/recipe', async (req, res) => {
     const data = new Recipe({
