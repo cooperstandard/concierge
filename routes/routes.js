@@ -7,7 +7,7 @@ const router = express.Router()
 const Recipe = require('../models/recipe');
 const User = require('../models/user');
 
-
+// Section: GET endpoints
 // Get all recipes
 router.get('/all', async (req, res) => {
     try{
@@ -45,24 +45,30 @@ router.get('/search', async (req, res) => {
 })
 
 
+
+// Section: POST endpoints
 router.post('/login', async (req, res) => {
     console.log(req.body["user"]);
     res.status(200).json('success')
 
 })
 
-//Post Method
+
 router.post('/recipe', async (req, res) => {
     const data = new Recipe({
         title: req.body.title,
         description: req.body.description,
         ingredients : req.body.ingredients,
-            
+        photos : req.body.photos,
+        instructions : req.body.instructions,
+        allergens : req.body.allergens,
+        prepTime : req.body.prepTime    
     });
 
     try {
         const dataToSave = await data.save();
-        res.status(200).json(dataToSave)
+        console.log("posted " + data.title)
+        res.status(200).json(dataToSave);
         //console.log(data)
 
     }
@@ -71,6 +77,7 @@ router.post('/recipe', async (req, res) => {
         res.status(400).json({message: error.message})
     }
 })
+
 
 //Post Method
 router.post('/user', async (req, res) => {
@@ -93,7 +100,12 @@ router.post('/user', async (req, res) => {
     }
 })
 
+// Section: PATCH endpoints
 
+
+
+
+// Section: DELETE endpoints
 
 /* Set */
 //Post:

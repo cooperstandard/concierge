@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
     },
     jwt : {
         type : String,
-        required : true
+        required : false
     },
     restrictions : {
         type : [String],

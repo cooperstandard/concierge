@@ -20,13 +20,17 @@ const recipeSchema = new mongoose.Schema({
         type: [String],
         required: false
     },
-    photos : {
+    photos: {
         required: false,
         type: [String]
     },
-    instructions : {
+    instructions: {
         required: false,
         type: String 
+    },
+    prepTime: {
+        required: false,
+        type: String
     }
 }, {
     collection : "recipes"
