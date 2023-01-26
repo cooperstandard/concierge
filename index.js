@@ -2,8 +2,6 @@
 // Cooper Standard 2022
 
 
-
-
 const express = require('express');
 const mongoose = require('mongoose');
 const mongoString = process.env.DATABASE_URL;
