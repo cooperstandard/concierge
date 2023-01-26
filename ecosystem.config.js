@@ -2,7 +2,7 @@ module.exports = {
     apps: [
       {
         name: "concierge",
-        exec_mode: "cluster",
+        //exec_mode: "cluster",
         instances: "1",
         script: "./index.js", // your script
         args: "start",
