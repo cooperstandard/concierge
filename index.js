@@ -20,6 +20,7 @@ database.once('connected', () => {
 })
 const app = express();
 
+//TODO: disables cors, want to fix later
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
