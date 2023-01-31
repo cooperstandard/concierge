@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 const http = require('http');
 const https = require('https');
 const mongoString = process.env.DATABASE_URL;
-const host = process.env.remote;
+const host = process.env.HOSTNAME;
 const routes = require('./routes/routes');
 
 /*
