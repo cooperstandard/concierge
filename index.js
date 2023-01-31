@@ -6,7 +6,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const https = require('https');
 const mongoString = process.env.DATABASE_URL;
-const host = process.env.HOSTNAME;
+const host = process.env.remote;
 const routes = require('./routes/routes');
 
 /*
@@ -49,7 +49,7 @@ app.use(express.json());
 //all endpoints start from /api
 app.use('/api', routes)
 
-if (host != "concierge") {
+if (!host) {
     app.listen(3000, () => {
         console.log(`Server Started on port ${3000}`)
     })
