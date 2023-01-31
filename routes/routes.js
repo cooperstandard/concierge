@@ -106,6 +106,11 @@ router.post('/user', async (req, res) => {
 
 
 // Section: DELETE endpoints
+router.delete('/all', async (req, res) => {
+
+    res.send('Delete by ID API')
+
+})
 
 /* Set */
 //Post:

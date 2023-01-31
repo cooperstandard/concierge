@@ -1,11 +1,21 @@
 // Concierge: index.js
 // Cooper Standard 2022
 
-
+const fs = require('fs');
 const express = require('express');
 const mongoose = require('mongoose');
+const https = require('https');
 const mongoString = process.env.DATABASE_URL;
+const host = process.env.HOSTNAME;
 const routes = require('./routes/routes');
+
+/*
+Certificate is saved at: /etc/letsencrypt/live/concierge.cooperstandard.org/fullchain.pem
+Key is saved at:         /etc/letsencrypt/live/concierge.cooperstandard.org/privkey.pem
+*/
+
+
+
 
 mongoose.set('strictQuery', false);
 mongoose.connect(mongoString);
@@ -18,7 +28,14 @@ database.on('error', (error) => {
 database.once('connected', () => {
     console.log('Database Connected');
 })
+
+
+// Setting up webserver
+
+console.log("Running on: " + host);
+
 const app = express();
+
 
 //TODO: disables cors, want to fix later
 app.use(function(req, res, next) {
@@ -32,8 +49,29 @@ app.use(express.json());
 //all endpoints start from /api
 app.use('/api', routes)
 
-app.listen(3000, () => {
-    console.log(`Server Started on port ${3000}`)
-})
+if (host != "concierge") {
+    app.listen(3000, () => {
+        console.log(`Server Started on port ${3000}`)
+    })
+} else {
+    const privateKey  = fs.readFileSync('/etc/letsencrypt/live/concierge.cooperstandard.org/privkey.pem', 'utf8');
+    const certificate = fs.readFileSync('/etc/letsencrypt/live/concierge.cooperstandard.org/fullchain.pem', 'utf8');
+    const credentials = {key: privateKey, cert: certificate};
+
+    var httpsServer = https.createServer(credentials, app);
+
+    httpsServer.listen(8443);
+
+}
+
+
+
+
+
+
+
+
+
+
 
 

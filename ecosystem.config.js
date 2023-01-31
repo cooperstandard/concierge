@@ -7,7 +7,8 @@ module.exports = {
         script: "./index.js", // your script
         args: "start",
         env: {
-          DATABASE_URL: process.env.DATABASE_URL
+          DATABASE_URL: process.env.DATABASE_URL,
+          host: "concierge"
         },
       },
     ],
