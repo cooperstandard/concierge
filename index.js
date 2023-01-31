@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 const http = require('http');
 const https = require('https');
 const mongoString = process.env.DATABASE_URL;
-const host = process.env.SHELL;
+const host = process.env.HOSTNAME;
 const routes = require('./routes/routes');
 
 /*
@@ -33,10 +33,7 @@ database.once('connected', () => {
 
 // Setting up webserver
 
-console.log("Running on: " + host);
-
 const app = express();
-
 
 //TODO: disables cors, want to fix later
 app.use(function(req, res, next) {
@@ -49,14 +46,13 @@ app.use(express.json());
 
 //all endpoints start from /api
 app.use('/api', routes)
-/*
-if (!host) {
+
+if (host != "concierge") {
     app.listen(3000, () => {
         console.log(`Server Started on port ${3000}`)
     })
 } else {
-*/
-    const port = 8443;
+    const port = process.env.PORT;
     const privateKey  = fs.readFileSync('/etc/letsencrypt/live/concierge.cooperstandard.org/privkey.pem', 'utf8');
     const certificate = fs.readFileSync('/etc/letsencrypt/live/concierge.cooperstandard.org/fullchain.pem', 'utf8');
     const credentials = {key: privateKey, cert: certificate};
@@ -67,7 +63,7 @@ if (!host) {
         console.log("server starting on port : " + port)
       });
 
-
+}
 
 
 
