@@ -8,7 +8,7 @@ module.exports = {
         args: "start",
         env: {
           DATABASE_URL: process.env.DATABASE_URL,
-          host: "concierge"
+          HOSTNAME: "concierge"
         },
       },
     ],
