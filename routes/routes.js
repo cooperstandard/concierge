@@ -106,9 +106,31 @@ router.post('/user', async (req, res) => {
 
 
 // Section: DELETE endpoints
-router.delete('/all', async (req, res) => {
 
-    res.send('Delete by ID API')
+// Delete all
+router.delete('/recipe/all', async (req, res) => {
+    try{
+        const data = await Recipe.deleteMany({"title" : term});
+        res.json(data)
+    }
+    catch(error){
+        res.status(500).json({message: error.message})
+    }
+    //res.send('Delete by ID API')
+
+})
+
+//delete by name
+router.delete('/recipe/search', async (req, res) => {
+    try{
+        const term = req.query.term;
+        const data = await Recipe.deleteMany({"title" : term});
+        res.json(data)
+    }
+    catch(error){
+        res.status(500).json({message: error.message})
+    }
+    //res.send('Delete by ID API')
 
 })
 

@@ -2,4 +2,4 @@ pm2 info concierge
 pm2 list
 pm2 stop concierge
 pm2 restart concierge
-pm2 start ecosystem.config.js
+pm2 start ecosystem.config.js //to update env variables from file
