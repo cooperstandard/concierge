@@ -56,6 +56,7 @@ if (!host) {
     })
 } else {
 */
+    const port = 8443;
     const privateKey  = fs.readFileSync('/etc/letsencrypt/live/concierge.cooperstandard.org/privkey.pem', 'utf8');
     const certificate = fs.readFileSync('/etc/letsencrypt/live/concierge.cooperstandard.org/fullchain.pem', 'utf8');
     const credentials = {key: privateKey, cert: certificate};
