@@ -102,7 +102,11 @@ router.post('/user', async (req, res) => {
 
 // Section: PATCH endpoints
 
+router.patch('/recipe/:title', async (req, res) => {
+    res.send('patch ' + req.params["title"])
 
+
+})
 
 
 // Section: DELETE endpoints
