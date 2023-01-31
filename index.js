@@ -60,7 +60,9 @@ if (host != "concierge") {
 
     var httpsServer = https.createServer(credentials, app);
 
-    httpsServer.listen(8443);
+    httpsServer.listen(port, () => {
+        console.log("server starting on port : " + port)
+      });
 
 }
 
