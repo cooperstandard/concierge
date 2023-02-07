@@ -48,10 +48,12 @@ app.use(express.json());
 app.use('/api', routes)
 
 if (host != "concierge") {
+    // if running on localhost
     app.listen(3000, () => {
         console.log(`Server Started on port ${3000}`)
     })
 } else {
+    // if running on deploy server
     const port = process.env.PORT;
     const privateKey  = fs.readFileSync('/etc/letsencrypt/live/concierge.cooperstandard.org/privkey.pem', 'utf8');
     const certificate = fs.readFileSync('/etc/letsencrypt/live/concierge.cooperstandard.org/fullchain.pem', 'utf8');
