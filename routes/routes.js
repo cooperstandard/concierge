@@ -1,7 +1,10 @@
 // Concierge: routes.js
 // Cooper Standard 2022
 
+//TODO: split recipe and user routes to seperate files
+//TODO: Description for each endpoint
 const express = require('express');
+const { findByIdAndUpdate } = require('../models/recipe');
 
 const router = express.Router()
 const Recipe = require('../models/recipe');
@@ -31,6 +34,19 @@ router.get('/users', async (req, res) => {
     }
 })
 
+//Get demo
+router.get('/demo', async (req, res) => {
+    try {
+        const content = [{"allergens":[],"_id":"63d18dab72444738921e3376","title":"Grilled Chicken","description":"Chicken Grilled","ingredients":["Chicken","Salt","Olive Oil"],"photos":[],"__v":0},{"_id":"63d883081e926b7ddb0662a8","title":"spam","description":"a pork product","ingredients":["pork","salt","can"],"allergens":["pork"],"photos":["https://cdn.britannica.com/06/234806-050-49A67E27/SPAM-can.jpg"],"instructions":"Open the can","prepTime":"1 minute","__v":0},{"_id":"63d889c61e926b7ddb0662ca","title":"Fried Rice","description":"Rice fried with onion and egg","ingredients":["rice","vegetable oil","egg","onion","garlic","soy sauce"],"allergens":["egg","onion","soy"],"photos":["https://www.kitchengidget.com/wp-content/uploads/2021/10/Garlic-Fried-Rice-recipe.jpg"],"instructions":"Cook the rice. Tinly slice the onions and garlic. heat oil in a pan on med-high heat. Add Garlic and onion to the pan and fry until slightly browned. crack egg into the pan and scrample, once almost scrambled add rice and soy sauce. Turn heat to high and mix ingredients, fry for another 3 minutes","prepTime":"15 minute","__v":0}]
+        res.json(content)
+    }
+    catch(error) {
+        res.status(500).json({message: error.message})
+    }
+})
+
+
+//TODO: signin
 
 // Search for recipe by title
 router.get('/search', async (req, res) => {
@@ -103,7 +119,22 @@ router.post('/user', async (req, res) => {
 // Section: PATCH endpoints
 
 router.patch('/recipe/:title', async (req, res) => {
-    res.send('patch ' + req.params["title"])
+    try {
+        const filter = {title: req.params.title};
+        const update = req.body
+        //console.log(update)
+        const options = {new: true}
+        const result =  await Recipe.findOneAndUpdate(filter, update, options)
+        console.log(result)
+        res.send(result)
+
+
+    }
+    catch (error) {
+        console.log(error.message)
+        res.status(400).json({message: error.message})
+    }
+
 
 
 })
