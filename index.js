@@ -8,14 +8,17 @@ const http = require('http');
 const https = require('https');
 const mongoString = process.env.DATABASE_URL;
 const host = process.env.HOSTNAME;
-const routes = require('./routes/routes');
+const routes = require('./routes/routes.js');
+const recipeRoutes = require('./routes/recipeRoutes');
+const userRoutes = require('./routes/userRoutes');
+
 
 /*
 Certificate is saved at: /etc/letsencrypt/live/concierge.cooperstandard.org/fullchain.pem
 Key is saved at:         /etc/letsencrypt/live/concierge.cooperstandard.org/privkey.pem
 */
 
-
+const conciergeSecret = process.env.conciergeSecret;
 
 
 mongoose.set('strictQuery', false);

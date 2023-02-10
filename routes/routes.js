@@ -1,18 +1,120 @@
 // Concierge: routes.js
-// Cooper Standard 2022
+// Cooper Standard 2023
 
 //TODO: split recipe and user routes to seperate files
 //TODO: Description for each endpoint
+
+/* TODO:
+ * [ ]: User log in
+ * [X]: Patch recipe by title
+ * [ ]: Patch recipe by id
+ * [ ]: Patch user by id
+ * 
+*/
 const express = require('express');
 const { findByIdAndUpdate } = require('../models/recipe');
-
 const router = express.Router()
 const Recipe = require('../models/recipe');
 const User = require('../models/user');
+const jwt = require('jsonwebtoken');
 
-// Section: GET endpoints
+// PREDEPLOY: this needs to be a private environment variable before we accept actual user data
+const conciergeSecret = process.env.conciergeSecret;
+
+
+function generateAccessToken(username) {
+    //TODO: enable. token expires after 10 minutes, figure out what the best value for this is
+    /*
+    const options = {expiresIn: "600s"} 
+    return jwt.sign(username, conciergeSecret, options)
+    */
+    return jwt.sign(username, conciergeSecret)
+
+
+}
+
+
+function authenticateToken(req, res, next) {
+    
+    const authHeader = req.headers['authorization']
+    const token = authHeader && authHeader.split(' ')[1]
+
+    if (token == null) {
+        return res.sendStatus(401)
+    } 
+
+    
+
+    jwt.verify(token, conciergeSecret, (err, user) => {
+        console.log(err)
+        // PREDEPLOY: this
+        if (err) {
+            return res.sendStatus(403)
+        }
+        
+        /*
+        if (err) {
+            console.log("token verification failed")
+        }
+        */
+        req.user = user
+
+        next()
+    })
+    
+}
+
+// SECTION: GET endpoints
+
+/* debug generate token 
+
+router.get('/generate', async (req,res) => {
+    try {
+        const username = req.body.username
+        const token = jwt.sign(username, conciergeSecret)
+
+        res.json({token})
+    }
+    catch (error) {
+        res.status(500).json({message: error.message})
+    }
+
+
+})
+/*
+*/
+
+router.get('/authenticate', async (req,res) => {
+    try {
+        const authHeader = req.headers['authorization']
+        const token = authHeader && authHeader.split(' ')[1]
+        if (token == null) return res.sendStatus(401)
+
+       
+
+        jwt.verify(token, conciergeSecret, (err, user) => {
+        //console.log(err)
+        // PREDEPLOY: this
+        //if (err) return res.sendStatus(403)
+
+            if (err) {
+                console.log("token verification failed")
+                res.status(500).json({message: "token verification failed"})
+            } else {
+                res.json({message: "verification successful", username: user})
+            }
+
+            
+
+        })
+    } 
+    catch(error) {
+        res.status(405).json({message: error.message})
+    }
+})
+
 // Get all recipes
-router.get('/all', async (req, res) => {
+router.get('/recipe/all', authenticateToken, async (req, res) => {
     try{
         
         const data = await Recipe.find();
@@ -23,7 +125,7 @@ router.get('/all', async (req, res) => {
     }
 })
 
-router.get('/users', async (req, res) => {
+router.get('/users', authenticateToken, async (req, res) => {
     try{
         
         const data = await User.find();
@@ -35,7 +137,7 @@ router.get('/users', async (req, res) => {
 })
 
 //Get demo
-router.get('/demo', async (req, res) => {
+router.get('/recipe/demo', async (req, res) => {
     try {
         const content = [{"allergens":[],"_id":"63d18dab72444738921e3376","title":"Grilled Chicken","description":"Chicken Grilled","ingredients":["Chicken","Salt","Olive Oil"],"photos":[],"__v":0},{"_id":"63d883081e926b7ddb0662a8","title":"spam","description":"a pork product","ingredients":["pork","salt","can"],"allergens":["pork"],"photos":["https://cdn.britannica.com/06/234806-050-49A67E27/SPAM-can.jpg"],"instructions":"Open the can","prepTime":"1 minute","__v":0},{"_id":"63d889c61e926b7ddb0662ca","title":"Fried Rice","description":"Rice fried with onion and egg","ingredients":["rice","vegetable oil","egg","onion","garlic","soy sauce"],"allergens":["egg","onion","soy"],"photos":["https://www.kitchengidget.com/wp-content/uploads/2021/10/Garlic-Fried-Rice-recipe.jpg"],"instructions":"Cook the rice. Tinly slice the onions and garlic. heat oil in a pan on med-high heat. Add Garlic and onion to the pan and fry until slightly browned. crack egg into the pan and scrample, once almost scrambled add rice and soy sauce. Turn heat to high and mix ingredients, fry for another 3 minutes","prepTime":"15 minute","__v":0}]
         res.json(content)
@@ -49,7 +151,7 @@ router.get('/demo', async (req, res) => {
 //TODO: signin
 
 // Search for recipe by title
-router.get('/search', async (req, res) => {
+router.get('/recipe/search', authenticateToken, async (req, res) => {
     try{
         const term = req.query.term;
         const data = await Recipe.find({"title" : term});
@@ -62,8 +164,8 @@ router.get('/search', async (req, res) => {
 
 
 
-// Section: POST endpoints
-router.post('/login', async (req, res) => {
+// SECTION: POST endpoints
+router.post('/user/login', async (req, res) => {
     console.log(req.body["user"]);
     res.status(200).json('success')
 
@@ -100,7 +202,8 @@ router.post('/user', async (req, res) => {
     const data = new User({
         name : req.body.name,
         restrictions : req.body.restrictions,
-        email : req.body.mail,
+        email : req.body.email,
+        jwt: generateAccessToken(req.body.email)
             
     });
 
@@ -116,9 +219,9 @@ router.post('/user', async (req, res) => {
     }
 })
 
-// Section: PATCH endpoints
+// SECTION: PATCH endpoints
 
-router.patch('/recipe/:title', async (req, res) => {
+router.patch('/recipe/title/:title', async (req, res) => {
     try {
         const filter = {title: req.params.title};
         const update = req.body
@@ -139,13 +242,35 @@ router.patch('/recipe/:title', async (req, res) => {
 
 })
 
+router.patch('/recipe/id/:id', async (req, res) => {
+    try {
+        
+        const update = req.body
+        //console.log(update)
+        const options = {new: true}
+        const result = await Recipe.findByIdAndUpdate(req.params.id, update, options)
+        console.log(result)
+        res.send(result)
 
-// Section: DELETE endpoints
+
+    }
+    catch (error) {
+        console.log(error.message)
+        res.status(400).json({message: error.message})
+    }
+
+
+
+})
+
+
+// SECTION: DELETE endpoints
 
 // Delete all
+//TODO: this is intentionally incomplete
 router.delete('/recipe/all', async (req, res) => {
     try{
-        const data = await Recipe.deleteMany({"title" : term});
+        const data = await Recipe.deleteMany({title: "none"});
         res.json(data)
     }
     catch(error){
@@ -159,7 +284,7 @@ router.delete('/recipe/all', async (req, res) => {
 router.delete('/recipe/search', async (req, res) => {
     try{
         const term = req.query.term;
-        const data = await Recipe.deleteMany({"title" : term});
+        const data = await Recipe.deleteOne({"title" : term});
         res.json(data)
     }
     catch(error){
@@ -169,63 +294,5 @@ router.delete('/recipe/search', async (req, res) => {
 
 })
 
-/* Set */
-//Post:
-/*
-router.post('/addCard/:setName', async (req, res) => {
-    const set = await Set.find(req.params.setNamesetName)
-    set.push(req.body.id)
-})
 
-//Post Method
-router.post('/post/card', async (req, res) => {
-    const data = new Card({
-        title: req.body.title,
-        description: req.body.description,
-        state : req.body.state,
-        focus : req.body.focus
-            
-    });
-        //handle later
-       //state ? req.body.state : null,
-
-    try {
-        const dataToSave = await data.save();
-        res.status(200).json(dataToSave)
-        //console.log(data)
-
-    }
-    catch (error) {
-        
-        res.status(400).json({message: error.message})
-    }
-})
-
-//Get all Method
-router.get('/getAll', async (req, res) => {
-    try{
-        const data = await Card.find();
-        res.json(data)
-    }
-    catch(error){
-        res.status(500).json({message: error.message})
-    }
-})
-
-//Get by ID Method
-router.get('/getOne/:id', (req, res) => {
-    res.send(req.params.id)
-})
-
-//Update by ID Method
-router.patch('/update/:id', (req, res) => {
-    res.send('Update by ID API')
-})
-
-
-//Delete by ID Method
-router.delete('/delete/:id', (req, res) => {
-    res.send('Delete by ID API')
-})
-*/
 module.exports = router;
