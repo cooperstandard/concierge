@@ -6,6 +6,7 @@
 
 /* TODO:
  * [ ]: User log in
+ * [ ]: Enable Authentications
  * [X]: Patch recipe by title
  * [ ]: Patch recipe by id
  * [ ]: Patch user by id
@@ -46,9 +47,10 @@ function authenticateToken(req, res, next) {
     
 
     jwt.verify(token, conciergeSecret, (err, user) => {
-        console.log(err)
+        
         // PREDEPLOY: this
         if (err) {
+            console.log(err)
             return res.sendStatus(403)
         }
         
@@ -62,6 +64,11 @@ function authenticateToken(req, res, next) {
         next()
     })
     
+}
+
+function noAuthenticateToken(req,res,next) {
+    req.user = "none"
+    next()
 }
 
 // SECTION: GET endpoints
@@ -83,7 +90,7 @@ router.get('/generate', async (req,res) => {
 })
 /*
 */
-
+//tests if the access token is valid
 router.get('/authenticate', async (req,res) => {
     try {
         const authHeader = req.headers['authorization']
@@ -114,7 +121,7 @@ router.get('/authenticate', async (req,res) => {
 })
 
 // Get all recipes
-router.get('/recipe/all', authenticateToken, async (req, res) => {
+router.get('/recipe/all', noAuthenticateToken, async (req, res) => {
     try{
         
         const data = await Recipe.find();
@@ -125,7 +132,7 @@ router.get('/recipe/all', authenticateToken, async (req, res) => {
     }
 })
 
-router.get('/users', authenticateToken, async (req, res) => {
+router.get('/users', noAuthenticateToken, async (req, res) => {
     try{
         
         const data = await User.find();
@@ -151,7 +158,7 @@ router.get('/recipe/demo', async (req, res) => {
 //TODO: signin
 
 // Search for recipe by title
-router.get('/recipe/search', authenticateToken, async (req, res) => {
+router.get('/recipe/search', noAuthenticateToken, async (req, res) => {
     try{
         const term = req.query.term;
         const data = await Recipe.find({"title" : term});

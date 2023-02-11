@@ -18,7 +18,6 @@ Certificate is saved at: /etc/letsencrypt/live/concierge.cooperstandard.org/full
 Key is saved at:         /etc/letsencrypt/live/concierge.cooperstandard.org/privkey.pem
 */
 
-const conciergeSecret = process.env.conciergeSecret;
 
 
 mongoose.set('strictQuery', false);
