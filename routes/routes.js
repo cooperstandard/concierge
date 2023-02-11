@@ -44,21 +44,13 @@ function authenticateToken(req, res, next) {
         return res.sendStatus(401)
     } 
 
-    
-
-    jwt.verify(token, conciergeSecret, (err, user) => {
-        
+    jwt.verify(token, conciergeSecret, (err, user) => { 
         // PREDEPLOY: this
         if (err) {
             console.log(err)
             return res.sendStatus(403)
         }
-        
-        /*
-        if (err) {
-            console.log("token verification failed")
-        }
-        */
+
         req.user = user
 
         next()
@@ -90,6 +82,7 @@ router.get('/generate', async (req,res) => {
 })
 /*
 */
+
 //tests if the access token is valid
 router.get('/authenticate', async (req,res) => {
     try {
@@ -132,6 +125,22 @@ router.get('/recipe/all', noAuthenticateToken, async (req, res) => {
     }
 })
 
+//TODO:
+router.get('/user/login', async (req, res) => {
+    try {
+
+
+    }
+    catch (error) {
+        res.status(500).json({message: error.message})
+    }
+
+    console.log(req.body["username"]);
+    res.status(200).json({token: generateAccessToken('admin')})
+
+})
+
+
 router.get('/users', noAuthenticateToken, async (req, res) => {
     try{
         
@@ -154,9 +163,6 @@ router.get('/recipe/demo', async (req, res) => {
     }
 })
 
-
-//TODO: signin
-
 // Search for recipe by title
 router.get('/recipe/search', noAuthenticateToken, async (req, res) => {
     try{
@@ -172,11 +178,6 @@ router.get('/recipe/search', noAuthenticateToken, async (req, res) => {
 
 
 // SECTION: POST endpoints
-router.post('/user/login', async (req, res) => {
-    console.log(req.body["user"]);
-    res.status(200).json('success')
-
-})
 
 
 router.post('/recipe', async (req, res) => {
@@ -205,6 +206,12 @@ router.post('/recipe', async (req, res) => {
 
 
 //Post Method
+/* TODO: save user account
+ * [ ]: make sure email is unique, if not send error
+ * [ ]: generate token
+ * [ ]: save user account
+ * [ ]: send back token
+*/
 router.post('/user', async (req, res) => {
     const data = new User({
         name : req.body.name,
