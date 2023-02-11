@@ -8,8 +8,9 @@
  * [ ]: User log in
  * [ ]: Enable Authentications
  * [X]: Patch recipe by title
- * [ ]: Patch recipe by id
+ * [X]: Patch recipe by id
  * [ ]: Patch user by id
+ * [ ]: actual login endpoint
  * 
 */
 const express = require('express');
@@ -125,7 +126,7 @@ router.get('/recipe/all', noAuthenticateToken, async (req, res) => {
     }
 })
 
-//TODO:
+//TODO: actual login endpoint
 router.get('/user/login', async (req, res) => {
     try {
 
