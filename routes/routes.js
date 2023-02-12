@@ -24,13 +24,13 @@ const jwt = require('jsonwebtoken');
 const conciergeSecret = process.env.conciergeSecret;
 
 
-function generateAccessToken(username) {
+function generateAccessToken(username, name) {
     //TODO: enable. token expires after 10 minutes, figure out what the best value for this is
     /*
     const options = {expiresIn: "600s"} 
     return jwt.sign(username, conciergeSecret, options)
     */
-    return jwt.sign(username, conciergeSecret)
+    return jwt.sign({userid: 1, email: username}, conciergeSecret)
 
 
 }
@@ -134,12 +134,12 @@ router.get('/user/login', async (req, res) => {
     }
 
     console.log(req.body);
-    res.status(200).json({token: generateAccessToken('admin')})
+    res.status(200).json({token: generateAccessToken('admin', 'admin')})
 
 })
 
 
-router.get('/users', noAuthenticateToken, async (req, res) => {
+router.get('/user/all', noAuthenticateToken, async (req, res) => {
     try {
         
         const data = await User.find();
@@ -172,7 +172,7 @@ router.get('/recipe/search', noAuthenticateToken, async (req, res) => {
 
 
 router.post('/user/login', async (req, res) => {
-    let {email, password, role, name} = req.body
+    let {email, password} = req.body
     let existingUser;
 
     try {
@@ -180,51 +180,80 @@ router.post('/user/login', async (req, res) => {
     } catch {
         const error = new Error("Error! User not found");
         res.status(500).json({message: error.message});
+        return
     }
+    if (!existingUser || existingUser.password != password) {
+        res.status(401).json({message: "Wrong details please check at once"});
+        return
+    }
+
+    let token;
+    try {
+        token = jwt.sign(
+            {userId : existingUser.id, email: existingUser.email},
+            conciergeSecret,
+            {expiresIn : "10m"}
+        );
+    } catch(error) {
+        console.log(err);
+        error = new Error("Error! Something went wrong.");
+        res.status(500).json({message : error.message})
+        return
+    }
+
+    res
+        .status(200)
+        .json({
+          success: true,
+          data: {
+              userId: existingUser.id,
+              email: existingUser.email,
+              token: token,
+          },
+        });
+})
+
+
+router.post("/signup", async (req, res, next) => {
+    const { name, email, password } = req.body;
+    const newUser = User({
+        name,
+        email,
+        password,
+    });
+
+    try {
+        await newUser.save();
+        
+    } catch {
+        const error = new Error("Error! Something went wrong.");
+        return next(error);
+    }
+    let token;
+    try {
+        token = jwt.sign(
+            { userId: newUser.id, email: newUser.email },
+            "secretkeyappearshere",
+            { expiresIn: "1h" }
+        );
+    } catch (err) {
+        const error = new Error("Error! Something went wrong.");
+        return next(error);
+    }
+    res
+        .status(201)
+        .json({
+            success: true,
+            data: {
+                userId: newUser.id,
+                email: newUser.email, token: token
+            },
+        });
 
 
 })
 /*
-app.post("/login", async (req, res, next) => {
-  let { email, password } = req.body;
- 
-  let existingUser;
-  try {
-    existingUser = await User.findOne({ email: email });
-  } catch {
-    const error = new Error("Error! Something went wrong.");
-    return next(error);
-  }
-  if (!existingUser || existingUser.password != password) {
-    const error = Error("Wrong details please check at once");
-    return next(error);
-  }
-  let token;
-  try {
-    //Creating jwt token
-    token = jwt.sign(
-      { userId: existingUser.id, email: existingUser.email },
-      "secretkeyappearshere",
-      { expiresIn: "1h" }
-    );
-  } catch (err) {
-    console.log(err);
-    const error = new Error("Error! Something went wrong.");
-    return next(error);
-  }
- 
-  res
-    .status(200)
-    .json({
-      success: true,
-      data: {
-        userId: existingUser.id,
-        email: existingUser.email,
-        token: token,
-      },
-    });
-});
- 
+
 // Handling post request
 app.post("/signup", async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -295,6 +324,7 @@ router.post('/recipe', async (req, res) => {
  * [ ]: save user account
  * [ ]: send back token
 */
+/*
 router.post('/user', async (req, res) => {
     const data = new User({
         name : req.body.name,
@@ -314,6 +344,7 @@ router.post('/user', async (req, res) => {
         res.status(400).json({message: error.message})
     }
 })
+*/
 
 // SECTION: PATCH endpoints
 

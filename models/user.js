@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
         type : String,
         required : true
     },
-    jwt : {
+    password : {
         type : String,
         required : true
     },
