@@ -102,26 +102,24 @@ router.get('/authenticate', async (req,res) => {
                 console.log("token verification failed")
                 res.status(500).json({message: "token verification failed"})
             } else {
-                res.json({message: "verification successful", username: user})
+                res.json({message: "verification successful", email: user})
             }
 
             
 
         })
-    } 
-    catch(error) {
+    } catch(error) {
         res.status(405).json({message: error.message})
     }
 })
 
 // Get all recipes
 router.get('/recipe/all', noAuthenticateToken, async (req, res) => {
-    try{
+    try {
         
         const data = await Recipe.find();
         res.json(data)
-    }
-    catch(error){
+    } catch(error) {
         res.status(500).json({message: error.message})
     }
 })
@@ -131,24 +129,22 @@ router.get('/user/login', async (req, res) => {
     try {
 
 
-    }
-    catch (error) {
+    } catch (error) {
         res.status(500).json({message: error.message})
     }
 
-    console.log(req.body["username"]);
+    console.log(req.body);
     res.status(200).json({token: generateAccessToken('admin')})
 
 })
 
 
 router.get('/users', noAuthenticateToken, async (req, res) => {
-    try{
+    try {
         
         const data = await User.find();
         res.json(data)
-    }
-    catch(error){
+    } catch(error){
         res.status(500).json({message: error.message})
     }
 })
@@ -158,8 +154,7 @@ router.get('/recipe/demo', async (req, res) => {
     try {
         const content = [{"allergens":[],"_id":"63d18dab72444738921e3376","title":"Grilled Chicken","description":"Chicken Grilled","ingredients":["Chicken","Salt","Olive Oil"],"photos":[],"__v":0},{"_id":"63d883081e926b7ddb0662a8","title":"spam","description":"a pork product","ingredients":["pork","salt","can"],"allergens":["pork"],"photos":["https://cdn.britannica.com/06/234806-050-49A67E27/SPAM-can.jpg"],"instructions":"Open the can","prepTime":"1 minute","__v":0},{"_id":"63d889c61e926b7ddb0662ca","title":"Fried Rice","description":"Rice fried with onion and egg","ingredients":["rice","vegetable oil","egg","onion","garlic","soy sauce"],"allergens":["egg","onion","soy"],"photos":["https://www.kitchengidget.com/wp-content/uploads/2021/10/Garlic-Fried-Rice-recipe.jpg"],"instructions":"Cook the rice. Tinly slice the onions and garlic. heat oil in a pan on med-high heat. Add Garlic and onion to the pan and fry until slightly browned. crack egg into the pan and scrample, once almost scrambled add rice and soy sauce. Turn heat to high and mix ingredients, fry for another 3 minutes","prepTime":"15 minute","__v":0}]
         res.json(content)
-    }
-    catch(error) {
+    } catch(error) {
         res.status(500).json({message: error.message})
     }
 })
@@ -170,13 +165,101 @@ router.get('/recipe/search', noAuthenticateToken, async (req, res) => {
         const term = req.query.term;
         const data = await Recipe.find({"title" : term});
         res.json(data)
-    }
-    catch(error){
+    } catch(error){
         res.status(500).json({message: error.message})
     }
 })
 
 
+router.post('/user/login', async (req, res) => {
+    let {email, password, role, name} = req.body
+    let existingUser;
+
+    try {
+        existingUser = await User.findOne({email: email})
+    } catch {
+        const error = new Error("Error! User not found");
+        res.status(500).json({message: error.message});
+    }
+
+
+})
+/*
+app.post("/login", async (req, res, next) => {
+  let { email, password } = req.body;
+ 
+  let existingUser;
+  try {
+    existingUser = await User.findOne({ email: email });
+  } catch {
+    const error = new Error("Error! Something went wrong.");
+    return next(error);
+  }
+  if (!existingUser || existingUser.password != password) {
+    const error = Error("Wrong details please check at once");
+    return next(error);
+  }
+  let token;
+  try {
+    //Creating jwt token
+    token = jwt.sign(
+      { userId: existingUser.id, email: existingUser.email },
+      "secretkeyappearshere",
+      { expiresIn: "1h" }
+    );
+  } catch (err) {
+    console.log(err);
+    const error = new Error("Error! Something went wrong.");
+    return next(error);
+  }
+ 
+  res
+    .status(200)
+    .json({
+      success: true,
+      data: {
+        userId: existingUser.id,
+        email: existingUser.email,
+        token: token,
+      },
+    });
+});
+ 
+// Handling post request
+app.post("/signup", async (req, res, next) => {
+  const { name, email, password } = req.body;
+  const newUser = User({
+    name,
+    email,
+    password,
+  });
+ 
+  try {
+    await newUser.save();
+  } catch {
+    const error = new Error("Error! Something went wrong.");
+    return next(error);
+  }
+  let token;
+  try {
+    token = jwt.sign(
+      { userId: newUser.id, email: newUser.email },
+      "secretkeyappearshere",
+      { expiresIn: "1h" }
+    );
+  } catch (err) {
+    const error = new Error("Error! Something went wrong.");
+    return next(error);
+  }
+  res
+    .status(201)
+    .json({
+      success: true,
+      data: { userId: newUser.id,
+          email: newUser.email, token: token },
+    });
+});
+*/
 
 // SECTION: POST endpoints
 
@@ -198,8 +281,7 @@ router.post('/recipe', async (req, res) => {
         res.status(200).json(dataToSave);
         //console.log(data)
 
-    }
-    catch (error) {
+    } catch (error) {
         
         res.status(400).json({message: error.message})
     }
@@ -227,8 +309,7 @@ router.post('/user', async (req, res) => {
         res.status(200).json(dataToSave)
         //console.log(data)
 
-    }
-    catch (error) {
+    } catch (error) {
         
         res.status(400).json({message: error.message})
     }
@@ -247,8 +328,7 @@ router.patch('/recipe/title/:title', async (req, res) => {
         res.send(result)
 
 
-    }
-    catch (error) {
+    } catch (error) {
         console.log(error.message)
         res.status(400).json({message: error.message})
     }
@@ -268,8 +348,7 @@ router.patch('/recipe/id/:id', async (req, res) => {
         res.send(result)
 
 
-    }
-    catch (error) {
+    } catch (error) {
         console.log(error.message)
         res.status(400).json({message: error.message})
     }
@@ -284,11 +363,10 @@ router.patch('/recipe/id/:id', async (req, res) => {
 // Delete all
 //TODO: this is intentionally incomplete
 router.delete('/recipe/all', async (req, res) => {
-    try{
+    try {
         const data = await Recipe.deleteMany({title: "none"});
         res.json(data)
-    }
-    catch(error){
+    } catch(error) {
         res.status(500).json({message: error.message})
     }
     //res.send('Delete by ID API')
@@ -297,12 +375,11 @@ router.delete('/recipe/all', async (req, res) => {
 
 //delete by name
 router.delete('/recipe/search', async (req, res) => {
-    try{
+    try {
         const term = req.query.term;
         const data = await Recipe.deleteOne({"title" : term});
         res.json(data)
-    }
-    catch(error){
+    } catch(error) {
         res.status(500).json({message: error.message})
     }
     //res.send('Delete by ID API')
