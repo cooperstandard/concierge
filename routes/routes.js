@@ -5,12 +5,14 @@
 //TODO: Description for each endpoint
 
 /* TODO:
- * [ ]: User log in
+ * [X]: User log in
  * [ ]: Enable Authentications
  * [X]: Patch recipe by title
  * [X]: Patch recipe by id
- * [ ]: Patch user by id
- * [ ]: actual login endpoint
+ * [X]: Patch user by email
+ * [X]: actual login endpoint
+ * [ ]: user/like endpoint (like by id)
+ * [ ]: user/remove endpoint (dislike by id)
  * 
 */
 const express = require('express');
@@ -22,6 +24,7 @@ const jwt = require('jsonwebtoken');
 
 // PREDEPLOY: this needs to be a private environment variable before we accept actual user data
 const conciergeSecret = process.env.conciergeSecret;
+
 
 
 function generateAccessToken(username, name) {
@@ -88,10 +91,11 @@ router.get('/generate', async (req,res) => {
 router.get('/authenticate', async (req,res) => {
     try {
         const authHeader = req.headers['authorization']
+        console.log(authHeader)
         const token = authHeader && authHeader.split(' ')[1]
         if (token == null) return res.sendStatus(401)
 
-       
+        
 
         jwt.verify(token, conciergeSecret, (err, user) => {
         //console.log(err)
@@ -99,7 +103,7 @@ router.get('/authenticate', async (req,res) => {
         //if (err) return res.sendStatus(403)
 
             if (err) {
-                console.log("token verification failed")
+                console.log(err)
                 res.status(500).json({message: "token verification failed"})
             } else {
                 res.json({message: "verification successful", email: user})
@@ -192,7 +196,7 @@ router.post('/user/login', async (req, res) => {
         token = jwt.sign(
             {userId : existingUser.id, email: existingUser.email},
             conciergeSecret,
-            {expiresIn : "10m"}
+            {}
         );
     } catch(error) {
         console.log(err);
@@ -200,7 +204,7 @@ router.post('/user/login', async (req, res) => {
         res.status(500).json({message : error.message})
         return
     }
-
+    console.log(token)
     res
         .status(200)
         .json({
@@ -294,6 +298,7 @@ app.post("/signup", async (req, res, next) => {
 
 
 router.post('/recipe', async (req, res) => {
+    console.log(req.body)
     const data = new Recipe({
         title: req.body.title,
         description: req.body.description,
@@ -318,12 +323,7 @@ router.post('/recipe', async (req, res) => {
 
 
 //Post Method
-/* TODO: save user account
- * [ ]: make sure email is unique, if not send error
- * [ ]: generate token
- * [ ]: save user account
- * [ ]: send back token
-*/
+
 /*
 router.post('/user', async (req, res) => {
     const data = new User({
@@ -388,11 +388,34 @@ router.patch('/recipe/id/:id', async (req, res) => {
 
 })
 
+router.patch('/user/email/:email', async (req, res) => {
+    try {
+        
+        const update = req.body
+        if (update.email != null) {
+            new Error("can not update email with this endpoint");
+        }
+        //console.log(update)
+        const options = {new: true}
+        const result = await User.findOneAndUpdate({email: req.params.email}, update, options)
+        console.log(result)
+        res.send(result)
+
+
+    } catch (error) {
+        console.log(error.message)
+        res.status(400).json({message: error.message})
+    }
+
+
+
+})
+
 
 // SECTION: DELETE endpoints
 
 // Delete all
-//TODO: this is intentionally incomplete
+//TODO: this is intentionally broken
 router.delete('/recipe/all', async (req, res) => {
     try {
         const data = await Recipe.deleteMany({title: "none"});

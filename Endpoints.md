@@ -77,7 +77,18 @@ const userSchema = {
 ## Get Endpoints
 ### Recipes
 - `/recipe/all`:
-    - requires an access token in the header: `authorization : <token>`
+    - requires an access token in the header: `authorization : Bearer <token>`
     - no body is required
     - returns an array of all currently available recipes.
-
+- `/recipe/search`:
+    - requires access token in the header: `authorization : Bearer <token>`
+    - no body is required
+    - requires a query term, ie `/api/recipe/search?term=spam`
+### Users
+- `/authenticate`:
+    - requires an access token in the header: `authorization : Bearer <token>`
+    - no body is required
+    - if the token is correct it returns the email associated with the account, if incorrect returns a status 500
+- `/user/all`:
+    - requires an admin access token `authorization : Bearer <admin token>`
+    - 
