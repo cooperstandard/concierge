@@ -1,5 +1,5 @@
 # Foodflash Api Endpoints
-#### updated 2/11/2023
+#### updated 2/13/2023
 
 ## Basic Information
 The base url for all endpoints is `https://concierge.cooperstandard.org:8443/api`. The endpoints are listed by what needs to be appended to this base url, i.e. the endpoint listed as `/recipe/all` has a complete url `https://concierge/cooperstandard.org:8443/api/recipe/all`. Endpoints are divided by http method and which model they operate on, either recipes or users. See the notes under each endpoint for what is required and expected in the request body and headers. All request bodies should be raw json, this means request headers should include: `'Content-Type' : 'application/json'`. All objects also have a unique `_id` field in addition to what is outlined below.
@@ -91,4 +91,45 @@ const userSchema = {
     - if the token is correct it returns the email associated with the account, if incorrect returns a status 500
 - `/user/all`:
     - requires an admin access token `authorization : Bearer <admin token>`
-    - 
+    - no body is required
+    - returns an array of all user accounts currently in the database
+
+## Post Endpoints
+### Recipes
+- `/recipe`
+    - requires `authorization : Bearer <admin token>`
+    - body requires all the fields for the recipe to be posted for example:
+    ```json
+    {
+        "title": "Fried Rice",
+        "description": "Rice fried with onion and egg",
+        "ingredients": [
+            "rice",
+            "vegetable oil",
+            "egg",
+            "onion",
+            "garlic",
+            "soy sauce"
+        ],
+        "allergens": [
+            "egg",
+            "onion",
+            "soy"
+        ],
+        "photos": [
+            "https://cdn.britannica.com/06/234806-050-49A67E27/SPAM-can.jpg"
+        ],
+        "instructions": "Cook the rice. Tinly slice the onions and garlic. heat oil in a pan on med-high heat. Add Garlic and onion to the pan and fry until slightly browned. crack egg into the pan and scrample, once almost scrambled add rice and soy sauce. Turn heat to high and mix ingredients, fry for another 3 minutes",
+        "prepTime": "15 minutes",
+        "_id": "63ea97b8c0c979bb50eae252",
+        "__v": 0
+    }
+    ```
+    - returns a json representation of the posted recipe
+### Users
+- `/signup`
+    - requires an email, password, and name in the body. The email must be unique.
+    - returns a jwt and the user information if successful, returns a 401 status if an email is already associated with that account
+- `/login`
+    - requires a username and password in the body
+    - returns a jwt if successful and a 401 status if unsuccessful

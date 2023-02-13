@@ -24,6 +24,7 @@ const jwt = require('jsonwebtoken');
 
 // PREDEPLOY: this needs to be a private environment variable before we accept actual user data
 const conciergeSecret = process.env.conciergeSecret;
+console.log(conciergeSecret)
 
 
 
