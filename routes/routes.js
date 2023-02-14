@@ -24,7 +24,7 @@ const jwt = require('jsonwebtoken');
 
 // PREDEPLOY: this needs to be a private environment variable before we accept actual user data
 const conciergeSecret = process.env.conciergeSecret;
-console.log(conciergeSecret)
+//console.log(conciergeSecret)
 
 
 
@@ -200,7 +200,7 @@ router.post('/user/login', async (req, res) => {
             {}
         );
     } catch(error) {
-        console.log(err);
+        console.log(error);
         error = new Error("Error! Something went wrong.");
         res.status(500).json({message : error.message})
         return
