@@ -93,8 +93,11 @@ const userSchema = {
     - requires access token in the header: `authorization : Bearer <token>`
     - no body is required
     - requires a query term, ie `/api/recipe/search?term=spam`
-TODO:
- - [ ]: get liked recipes
+    - returns all recipes whose title's match the term
+ - `/user/liked`:
+    - requires access token in the header: `authorization : Bearer <token>`
+    - no body is required
+    - returns an array containing the id's of liked recipes
 ### Users
 - `/authenticate`:
     - requires an access token in the header: `authorization : Bearer <token>`
@@ -130,41 +133,61 @@ TODO:
         "photos": [
             "https://cdn.britannica.com/06/234806-050-49A67E27/SPAM-can.jpg"
         ],
-        "instructions": "Cook the rice. Tinly slice the onions and garlic. heat oil in a pan on med-high heat. Add Garlic and onion to the pan and fry until slightly browned. crack egg into the pan and scrample, once almost scrambled add rice and soy sauce. Turn heat to high and mix ingredients, fry for another 3 minutes",
+        "instructions": "Cook the rice. Thinly slice the onions and garlic. heat oil in a pan on med-high heat. Add Garlic and onion to the pan and fry until slightly browned. crack egg into the pan and scrample, once almost scrambled add rice and soy sauce. Turn heat to high and mix ingredients, fry for another 3 minutes",
         "prepTime": "15 minutes"
     }
     ```
     - returns a json representation of the posted recipe
 
 TODO:
- - [ ]: Like Recipe
  - [ ]: Dislike Recipe
 
 
 ### Users
-- `/signup`
+- `/user/signup`
     - requires an email, password, and name in the body. The email must be unique.
     - returns a jwt and the user information if successful, returns a 401 status if an email is already associated with that account
-- `/login`
+- `/user/login`
     - requires an email and password in the body
     - returns a jwt if successful and a 401 status if unsuccessful
+- `/user/refresh`:
+    - no auth header required
+    - requires user id, email, and current token in the body
+    - will only work if current session has the most recent token generated
+    - returns a new token
+- `/user/like`:
+    - requires an access token in the header: `authorization : Bearer <token>`
+    - requires the id of the recipe to like in the body stored like `recipe : <id here>`
+    - returns status 200 if successful
 
-TODO:
- - [ ]: refresh token
 
 ## Patch Endpoints
 ### Recipes
-
+- `/recipe/id/:id`
+    - requires an access token in the header: `authorization : Bearer <token>`
+    - replace `:id` at the end of the url with the id of the recipe to update
+    - the body should contain the json of the state of the fields to update
+    - returns the new version of the object
+- `/recipe/title`
+    - requires an access token in the header: `authorization : Bearer <token>`
+    - the title of the recipe should be stored in a query parameter
+    - the body should contain the json of the state of the fields to update
+    - returns the new version of the object
 
 ### Users
+- `/user/:id`
+    - requires an access token in the header: `authorization : Bearer <token>`
+    - replace `:id` at the end of the url with the id of the user
+    - the body should contain the json of the state of the fields to update
+    - returns the new version of the object
+
 TODO:
- - [ ]: Patch Recipe
- - [ ]: Patch User
+ - [ ]: Patch by email
 
 
 ## Delete Endpoints
 ### Recipes
-
+**These are still a work in progress**
 
 ### Users
 

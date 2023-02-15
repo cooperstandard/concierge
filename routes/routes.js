@@ -19,7 +19,6 @@
  * 
 */
 const express = require('express');
-const { findByIdAndUpdate } = require('../models/recipe');
 const router = express.Router()
 const Recipe = require('../models/recipe');
 const User = require('../models/user');
@@ -60,6 +59,7 @@ function authenticateToken(req, res, next) {
         }
 
         req.user = user
+
 
         next()
     })
@@ -167,6 +167,22 @@ router.get('/recipe/search', noAuthenticateToken, async (req, res) => {
 })
 
 router.get("/user/liked", authenticateToken, async (req, res) => {
+    let user;
+
+    try {
+        user = await User.findOne({email: req.user.email})
+
+    } catch (error) {
+        res.status(500).json({message: "unknown error occured"})
+        return
+    }
+
+    if(!user) {
+        res.status(500).json({message: "failed to find user"})
+        return
+    }
+
+    res.status(200).json({recipes: user.saved});
 
 
 
@@ -201,6 +217,43 @@ router.post('/recipe', async (req, res) => {
     }
 })
 
+router.post('/user/like', authenticateToken, async (req, res) => {
+    let user;
+    const recipe = req.body.recipe;
+
+    try {
+        //console.log(req.user)
+        user = await User.findOne({email: req.user.email})
+        //console.log(user)
+
+    } catch (error) {
+        res.status(500).json({message: "unknown error occured"})
+        return
+    }
+    if(!user) {
+        res.status(500).json({message: "failed to find user"})
+        return
+    }
+
+    var liked;
+
+    try {
+        liked = User.updateOne(
+            { "_id": req.user.userId},
+            { "$push": { "saved": recipe } },
+            function (err, raw) {
+                if (err) return handleError(err);
+                console.log('The raw response from Mongo was ', raw);
+            }
+         );
+        
+        res.status(200).json({message: "success"})
+    } catch (error) {
+        res.status(500).json({message: "failed to update"})
+        return
+    }
+
+})
 
 router.post('/user/login', async (req, res) => {
     let {email, password} = req.body
@@ -232,7 +285,8 @@ router.post('/user/login', async (req, res) => {
         return
     }
 
-    User.findByIdAndUpdate(existingUser.id, {oldToken: token});
+    await User.findByIdAndUpdate(existingUser.id, {oldToken: token});
+
 
 
     //console.log(token)
@@ -247,7 +301,7 @@ router.post('/user/login', async (req, res) => {
         });
 })
 
-router.post("/refresh", async (req, res) => {
+router.post("/user/refresh", async (req, res) => {
     const {token, email, id} = req.body;
     let user;
 
@@ -257,13 +311,14 @@ router.post("/refresh", async (req, res) => {
         res.status(500).json({message: "unable to refresh token"})
         return
     }
+    
 
     if (!user || token != user.oldToken) {
         res.status(500).json({message: "unable to refresh token, please login"})
         return
     }
 
-    newToken = await jwt.sign(
+    newToken = jwt.sign(
         { userId: id, email: email },
         conciergeSecret,
         { expiresIn: "1h" }
@@ -279,7 +334,7 @@ router.post("/refresh", async (req, res) => {
 })
 
 
-router.post("/signup", async (req, res) => {
+router.post("/user/signup", async (req, res) => {
     const { name, email, password } = req.body;
     let existingUser;
 
