@@ -16,7 +16,7 @@
  * [X]: user/refresh endpoint (refreshes an expired token)
  * [X]: save generated jwt to the users db entry
  * [ ]: tag support in post recipe
- * [ ]: get recipe by id 
+ * [X]: get recipe by id 
  * [ ]: get recipes by tag
  * [ ]: enable token expiration
  * [ ]: Enable Authentications
