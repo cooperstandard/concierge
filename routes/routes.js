@@ -130,6 +130,7 @@ router.get('/recipe/all', noAuthenticateToken, async (req, res) => {
 })
 
 //TODO: actual login endpoint
+/*
 router.get('/user/login', async (req, res) => {
     try {
 
@@ -142,6 +143,7 @@ router.get('/user/login', async (req, res) => {
     res.status(200).json({token: generateAccessToken('admin', 'admin')})
 
 })
+*/
 
 
 router.get('/user/all', noAuthenticateToken, async (req, res) => {
@@ -205,7 +207,7 @@ router.post('/user/login', async (req, res) => {
         res.status(500).json({message : error.message})
         return
     }
-    console.log(token)
+    //console.log(token)
     res
         .status(200)
         .json({
