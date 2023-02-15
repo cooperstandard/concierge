@@ -1,8 +1,13 @@
+---
+title: "Endpoints"
+output: pdf_document
+---
+
 # Foodflash Api Endpoints
-#### updated 2/13/2023
+#### updated 2/14/2023
 
 ## Basic Information
-The base url for all endpoints is `https://concierge.cooperstandard.org:8443/api`. The endpoints are listed by what needs to be appended to this base url, i.e. the endpoint listed as `/recipe/all` has a complete url `https://concierge/cooperstandard.org:8443/api/recipe/all`. Endpoints are divided by http method and which model they operate on, either recipes or users. See the notes under each endpoint for what is required and expected in the request body and headers. All request bodies should be raw json, this means request headers should include: `'Content-Type' : 'application/json'`. All objects also have a unique `_id` field in addition to what is outlined below.
+The base url for all endpoints is `https://concierge.cooperstandard.org:8443/api`. The endpoints are listed by what needs to be appended to this base url, i.e. the endpoint listed as `/recipe/all` has a complete url `https://concierge/cooperstandard.org:8443/api/recipe/all`. Endpoints are divided by http method and which model they operate on, either recipes or users. See the notes under each endpoint for what is required and expected in the request body and headers. All request bodies should be raw json, this means request headers should include: `'Content-Type' : 'application/json'`. All objects also have a unique `_id` field in addition to what is outlined below, these ids are automatically assigned **do not include them when posting content**. Authentication is handled through JWT bearer tokens. These are stored in the header and expire an hour after they are issued. If a token is expired send a refresh request.
 
 ##### this is the current Recipe data model:
 
@@ -61,6 +66,10 @@ const userSchema = {
         type : [String],
         required : false
     },
+    oldToken : {
+        type : String,
+        required : false
+    },
     
     saved : {
         type : [String],
@@ -70,7 +79,7 @@ const userSchema = {
 }
 
 ```
-**This will change soon**, hopefully not in ways that break existing functionality. Unlike recipe only name, restrictions, and saved are accesible by public endpoints. name stores the string of the users name, given at account registration and updatable with patch requests(see endpoint list). restrictions stores an array of dietary restrictions (these should match the set of allergens in recipes). saved is an array of recipe `_id`. **before we add real users I will need to encrypt the passwords in storage**
+**This will change soon**, hopefully not in ways that break existing functionality. Unlike recipe only name, restrictions, and saved are accesible by public endpoints. name stores the string of the users name, given at account registration and updatable with patch requests(see endpoint list). restrictions stores an array of dietary restrictions (these should match the set of allergens in recipes). saved is an array of recipe `_id`. The `oldToken` field stores the last issued token. **before we add real users I will need to encrypt the passwords in storage**
 
 
 
@@ -84,6 +93,8 @@ const userSchema = {
     - requires access token in the header: `authorization : Bearer <token>`
     - no body is required
     - requires a query term, ie `/api/recipe/search?term=spam`
+TODO:
+ - [ ]: get liked recipes
 ### Users
 - `/authenticate`:
     - requires an access token in the header: `authorization : Bearer <token>`
@@ -120,16 +131,47 @@ const userSchema = {
             "https://cdn.britannica.com/06/234806-050-49A67E27/SPAM-can.jpg"
         ],
         "instructions": "Cook the rice. Tinly slice the onions and garlic. heat oil in a pan on med-high heat. Add Garlic and onion to the pan and fry until slightly browned. crack egg into the pan and scrample, once almost scrambled add rice and soy sauce. Turn heat to high and mix ingredients, fry for another 3 minutes",
-        "prepTime": "15 minutes",
-        "_id": "63ea97b8c0c979bb50eae252",
-        "__v": 0
+        "prepTime": "15 minutes"
     }
     ```
     - returns a json representation of the posted recipe
+
+TODO:
+ - [ ]: Like Recipe
+ - [ ]: Dislike Recipe
+
+
 ### Users
 - `/signup`
     - requires an email, password, and name in the body. The email must be unique.
     - returns a jwt and the user information if successful, returns a 401 status if an email is already associated with that account
 - `/login`
-    - requires a username and password in the body
+    - requires an email and password in the body
     - returns a jwt if successful and a 401 status if unsuccessful
+
+TODO:
+ - [ ]: refresh token
+
+## Patch Endpoints
+### Recipes
+
+
+### Users
+TODO:
+ - [ ]: Patch Recipe
+ - [ ]: Patch User
+
+
+## Delete Endpoints
+### Recipes
+
+
+### Users
+
+TODO:
+ - [ ]: Delete recipe by id
+ - [ ]: Delete Recipe by title
+ - [ ]: Delete User by id
+ - [ ]: Delete User by email
+
+

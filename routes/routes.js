@@ -14,8 +14,8 @@
  * [ ]: user/like endpoint (like by id)
  * [ ]: user/dislike endpoint (dislike by id)
  * [ ]: user/getLiked endpoint (get liked recipes)
- * [ ]: user/refresh endpoint (refreshes an expired token)
- * [ ]: save generated jwt to the users db entry
+ * [X]: user/refresh endpoint (refreshes an expired token)
+ * [X]: save generated jwt to the users db entry
  * 
 */
 const express = require('express');
@@ -95,7 +95,7 @@ router.get('/generate', async (req,res) => {
 router.get('/authenticate', async (req,res) => {
     try {
         const authHeader = req.headers['authorization']
-        console.log(authHeader)
+        //console.log(authHeader)
         const token = authHeader && authHeader.split(' ')[1]
         if (token == null) return res.sendStatus(401)
 
@@ -135,7 +135,7 @@ router.get('/recipe/all', noAuthenticateToken, async (req, res) => {
 
 
 
-router.get('/user/all', noAuthenticateToken, async (req, res) => {
+router.get('/user/all', authenticateToken, async (req, res) => {
     try {
         
         const data = await User.find();
@@ -164,6 +164,13 @@ router.get('/recipe/search', noAuthenticateToken, async (req, res) => {
     } catch(error){
         res.status(500).json({message: error.message})
     }
+})
+
+router.get("/user/liked", authenticateToken, async (req, res) => {
+
+
+
+
 })
 
 
@@ -232,12 +239,11 @@ router.post('/user/login', async (req, res) => {
     res
         .status(200)
         .json({
-          success: true,
-          data: {
-              userId: existingUser.id,
-              email: existingUser.email,
-              token: token,
-          },
+          
+            userId: existingUser.id,
+            email: existingUser.email,
+            token: token,
+          
         });
 })
 
@@ -370,9 +376,9 @@ router.post('/user', async (req, res) => {
 
 // SECTION: PATCH endpoints
 
-router.patch('/recipe/title/:title', async (req, res) => {
+router.patch('/recipe/title', async (req, res) => {
     try {
-        const filter = {title: req.params.title};
+        const filter = {title: req.query.title};
         const update = req.body
         //console.log(update)
         const options = {new: true}
