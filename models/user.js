@@ -20,7 +20,10 @@ const userSchema = new mongoose.Schema({
         type : [String],
         required : false
     },
-    
+    oldToken : {
+        type : String,
+        required : false
+    },
     saved : {
         type : [String],
         required: false

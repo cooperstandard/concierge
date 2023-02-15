@@ -12,7 +12,10 @@
  * [X]: Patch user by email
  * [X]: actual login endpoint
  * [ ]: user/like endpoint (like by id)
- * [ ]: user/remove endpoint (dislike by id)
+ * [ ]: user/dislike endpoint (dislike by id)
+ * [ ]: user/getLiked endpoint (get liked recipes)
+ * [ ]: user/refresh endpoint (refreshes an expired token)
+ * [ ]: save generated jwt to the users db entry
  * 
 */
 const express = require('express');
@@ -129,21 +132,7 @@ router.get('/recipe/all', noAuthenticateToken, async (req, res) => {
     }
 })
 
-//TODO: actual login endpoint
-/*
-router.get('/user/login', async (req, res) => {
-    try {
 
-
-    } catch (error) {
-        res.status(500).json({message: error.message})
-    }
-
-    console.log(req.body);
-    res.status(200).json({token: generateAccessToken('admin', 'admin')})
-
-})
-*/
 
 
 router.get('/user/all', noAuthenticateToken, async (req, res) => {
@@ -178,125 +167,6 @@ router.get('/recipe/search', noAuthenticateToken, async (req, res) => {
 })
 
 
-router.post('/user/login', async (req, res) => {
-    let {email, password} = req.body
-    let existingUser;
-
-    try {
-        existingUser = await User.findOne({email: email})
-    } catch {
-        const error = new Error("Error! User not found");
-        res.status(500).json({message: error.message});
-        return
-    }
-    if (!existingUser || existingUser.password != password) {
-        res.status(401).json({message: "Wrong details please check at once"});
-        return
-    }
-
-    let token;
-    try {
-        token = jwt.sign(
-            {userId : existingUser.id, email: existingUser.email},
-            conciergeSecret,
-            {}
-        );
-    } catch(error) {
-        console.log(error);
-        error = new Error("Error! Something went wrong.");
-        res.status(500).json({message : error.message})
-        return
-    }
-    //console.log(token)
-    res
-        .status(200)
-        .json({
-          success: true,
-          data: {
-              userId: existingUser.id,
-              email: existingUser.email,
-              token: token,
-          },
-        });
-})
-
-
-router.post("/signup", async (req, res, next) => {
-    const { name, email, password } = req.body;
-    const newUser = User({
-        name,
-        email,
-        password,
-    });
-
-    try {
-        await newUser.save();
-        
-    } catch {
-        const error = new Error("Error! Something went wrong.");
-        return next(error);
-    }
-    let token;
-    try {
-        token = jwt.sign(
-            { userId: newUser.id, email: newUser.email },
-            "secretkeyappearshere",
-            { expiresIn: "1h" }
-        );
-    } catch (err) {
-        const error = new Error("Error! Something went wrong.");
-        return next(error);
-    }
-    res
-        .status(201)
-        .json({
-            success: true,
-            data: {
-                userId: newUser.id,
-                email: newUser.email, token: token
-            },
-        });
-
-
-})
-/*
-
-// Handling post request
-app.post("/signup", async (req, res, next) => {
-  const { name, email, password } = req.body;
-  const newUser = User({
-    name,
-    email,
-    password,
-  });
- 
-  try {
-    await newUser.save();
-  } catch {
-    const error = new Error("Error! Something went wrong.");
-    return next(error);
-  }
-  let token;
-  try {
-    token = jwt.sign(
-      { userId: newUser.id, email: newUser.email },
-      "secretkeyappearshere",
-      { expiresIn: "1h" }
-    );
-  } catch (err) {
-    const error = new Error("Error! Something went wrong.");
-    return next(error);
-  }
-  res
-    .status(201)
-    .json({
-      success: true,
-      data: { userId: newUser.id,
-          email: newUser.email, token: token },
-    });
-});
-*/
-
 // SECTION: POST endpoints
 
 
@@ -324,6 +194,155 @@ router.post('/recipe', async (req, res) => {
     }
 })
 
+
+router.post('/user/login', async (req, res) => {
+    let {email, password} = req.body
+    let existingUser;
+
+    try {
+        existingUser = await User.findOne({email: email})
+    } catch {
+        const error = new Error("Error! User not found");
+        res.status(500).json({message: error.message});
+        return
+    }
+    if (!existingUser || existingUser.password != password) {
+        res.status(401).json({message: "Wrong details please check at once"});
+        return
+    }
+
+    let token;
+    try {
+        token = jwt.sign(
+            {userId : existingUser.id, email: existingUser.email},
+            conciergeSecret,
+            {expiresIn : "1h"}
+        );
+    } catch(error) {
+        console.log(error);
+        error = new Error("Error! Something went wrong.");
+        res.status(500).json({message : error.message})
+        return
+    }
+
+    User.findByIdAndUpdate(existingUser.id, {oldToken: token});
+
+
+    //console.log(token)
+    res
+        .status(200)
+        .json({
+          success: true,
+          data: {
+              userId: existingUser.id,
+              email: existingUser.email,
+              token: token,
+          },
+        });
+})
+
+router.post("/refresh", async (req, res) => {
+    const {token, email, id} = req.body;
+    let user;
+
+    try {
+        user = await User.findOne({"email" : email});
+    } catch (error) {
+        res.status(500).json({message: "unable to refresh token"})
+        return
+    }
+
+    if (!user || token != user.oldToken) {
+        res.status(500).json({message: "unable to refresh token, please login"})
+        return
+    }
+
+    newToken = await jwt.sign(
+        { userId: id, email: email },
+        conciergeSecret,
+        { expiresIn: "1h" }
+    );
+
+    await User.findByIdAndUpdate(id, {oldToken: newToken});
+    console.log("updated token")
+    res.status(201).json({success: true, token: newToken})
+    
+
+
+    
+})
+
+
+router.post("/signup", async (req, res) => {
+    const { name, email, password } = req.body;
+    let existingUser;
+
+    try {
+        existingUser = await User.findOne({"email" : email});
+    } catch (error) {
+        res.status(500).json({message: "something whent wrong"})
+        return
+    }
+
+    if(existingUser) {
+        res.status(401).json({message: "user account alread exists with that email"})
+        return
+    }
+    
+
+    var newUser = User({
+        name: name,
+        email: email,
+        password: password,
+        oldToken: "",
+        restrictions: [],
+        saved: []
+
+    });
+
+    try {
+        newUser = await newUser.save();
+        
+    } catch {
+        const error = new Error("Error! Something went wrong.");
+        return next(error);
+    }
+
+    let token;
+    try {
+        token = jwt.sign(
+            { userId: newUser.id, email: newUser.email },
+            conciergeSecret,
+            { expiresIn: "1h" }
+        );
+    } catch (err) {
+        const error = new Error("Error! Something went wrong.");
+        return error;
+    }
+
+    try {
+       await User.findByIdAndUpdate(newUser.id, {oldToken: token});
+    } catch (error) {
+        res.status(500).json({message: error.message})
+        return
+    }
+    
+
+
+    
+    res
+        .status(201)
+        .json({
+            success: true,
+            data: {
+                userId: newUser.id,
+                email: newUser.email, 
+                token: token
+            },
+        });
+
+
+})
 
 //Post Method
 
@@ -440,6 +459,37 @@ router.delete('/recipe/search', async (req, res) => {
         res.status(500).json({message: error.message})
     }
     //res.send('Delete by ID API')
+
+})
+
+router.delete('/user/id', async (req, res) => {
+    try {
+        const id = req.query.id
+        const data = await User.findByIdAndDelete(id)
+        res.json(data)
+    } catch(error) {
+        res.status(500).json({message: error.message})
+    }
+
+
+})
+
+
+router.delete('/user/email', async (req, res) => {
+    try {
+        const email = req.query.email
+        const data = await User.findOneAndDelete({"email": email})
+        if (data) {
+            console.log('deleted user with email: %s', data.email)
+            res.json(data)
+        } else {
+            res.json({message: `no users found with email: ${email}`})
+        }
+        
+    } catch(error) {
+        res.status(500).json({message: error.message})
+    }
+
 
 })
 
