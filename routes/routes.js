@@ -11,12 +11,12 @@
  * [X]: Patch recipe by id
  * [X]: Patch user by email
  * [X]: actual login endpoint
- * [ ]: user/like endpoint (like by id)
+ * [X]: user/like endpoint (like by id)
  * [ ]: user/dislike endpoint (dislike by id)
- * [ ]: user/getLiked endpoint (get liked recipes)
+ * [X]: user/getLiked endpoint (get liked recipes)
  * [X]: user/refresh endpoint (refreshes an expired token)
  * [X]: save generated jwt to the users db entry
- * 
+ * [ ]: enable token expiration
 */
 const express = require('express');
 const router = express.Router()
@@ -31,7 +31,7 @@ const conciergeSecret = process.env.conciergeSecret;
 
 
 function generateAccessToken(username, name) {
-    //TODO: enable. token expires after 10 minutes, figure out what the best value for this is
+    //TODO: use this
     /*
     const options = {expiresIn: "600s"} 
     return jwt.sign(username, conciergeSecret, options)
@@ -272,7 +272,7 @@ router.post('/user/login', async (req, res) => {
         token = jwt.sign(
             {userId : existingUser.id, email: existingUser.email},
             conciergeSecret,
-            {expiresIn : "1h"}
+            { }//expiresIn : "1h"}
         );
     } catch(error) {
         console.log(error);
@@ -317,7 +317,7 @@ router.post("/user/refresh", async (req, res) => {
     newToken = jwt.sign(
         { userId: id, email: email },
         conciergeSecret,
-        { expiresIn: "1h" }
+        { }//expiresIn: "1h" }
     );
 
     await User.findByIdAndUpdate(id, {oldToken: newToken});
@@ -370,7 +370,7 @@ router.post("/user/signup", async (req, res) => {
         token = jwt.sign(
             { userId: newUser.id, email: newUser.email },
             conciergeSecret,
-            { expiresIn: "1h" }
+            { }//expiresIn: "1h" }
         );
     } catch (err) {
         const error = new Error("Error! Something went wrong.");
