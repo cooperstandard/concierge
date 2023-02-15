@@ -113,7 +113,7 @@ router.get('/authenticate', async (req,res) => {
                 console.log(err)
                 res.status(500).json({message: "token verification failed"})
             } else {
-                res.json({message: "verification successful", email: user})
+                res.json({message: "verification successful", user: user})
             }
 
             
