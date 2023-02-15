@@ -6,17 +6,20 @@
 
 /* TODO:
  * [X]: User log in
- * [ ]: Enable Authentications
  * [X]: Patch recipe by title
  * [X]: Patch recipe by id
  * [X]: Patch user by email
  * [X]: actual login endpoint
  * [X]: user/like endpoint (like by id)
- * [ ]: user/dislike endpoint (dislike by id)
+ * [X]: user/dislike endpoint (dislike by id)
  * [X]: user/getLiked endpoint (get liked recipes)
  * [X]: user/refresh endpoint (refreshes an expired token)
  * [X]: save generated jwt to the users db entry
+ * [ ]: tag support in post recipe
+ * [ ]: get recipe by id 
+ * [ ]: get recipes by tag
  * [ ]: enable token expiration
+ * [ ]: Enable Authentications
 */
 const express = require('express');
 const router = express.Router()
@@ -122,7 +125,7 @@ router.get('/authenticate', async (req,res) => {
 })
 
 // Get all recipes
-router.get('/recipe/all', noAuthenticateToken, async (req, res) => {
+router.get('/recipe/all', async (req, res) => {
     try {
         
         const data = await Recipe.find();
@@ -132,6 +135,24 @@ router.get('/recipe/all', noAuthenticateToken, async (req, res) => {
     }
 })
 
+
+router.get('/recipe/id/:id', async (req, res) => {
+    try {
+        //console.log(update)
+        
+        const result = await Recipe.findById(req.params.id)
+        console.log(result)
+        res.send(result)
+
+
+    } catch (error) {
+        console.log(error.message)
+        res.status(400).json({message: error.message})
+    }
+
+
+
+})
 
 
 
@@ -235,19 +256,62 @@ router.post('/user/like', authenticateToken, async (req, res) => {
         return
     }
 
-    var liked;
-
+    var liked = [...user.saved];
+    liked.push(recipe)
+    
     try {
-        liked = User.updateOne(
+        await User.updateOne(
             { "_id": req.user.userId},
-            { "$push": { "saved": recipe } }
+            { "$push": { "saved": recipe } },
+            {"new" : true}
          );
         
-        res.status(200).json({message: "success"})
+        res.status(200).json({likedRecipes: liked})
     } catch (error) {
         res.status(500).json({message: "failed to update"})
         return
     }
+
+})
+
+router.post('/user/dislike', authenticateToken, async (req, res) => {
+    let user;
+    const recipe = req.body.recipe;
+
+    try {
+        //console.log(req.user)
+        user = await User.findOne({email: req.user.email})
+        //console.log(user)
+
+    } catch (error) {
+        res.status(500).json({message: "unknown error occured"})
+        return
+    }
+    if(!user) {
+        res.status(500).json({message: "failed to find user"})
+        return
+    }
+
+    var liked = [...user.saved]
+    liked.splice(liked.indexOf(recipe), 1)
+
+    try {
+        await User.updateOne(
+            { "_id": req.user.userId},
+            { "$set": { "saved": liked }},
+            {"new" : true}
+         );
+        console.log(liked)
+        res.status(200).json({likedRecipes: liked})
+
+    } catch (error) {
+        res.status(500).json({message: "failed to update"})
+        return
+    }
+
+    //res.sendStatus(200)
+
+
 
 })
 

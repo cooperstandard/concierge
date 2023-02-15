@@ -40,6 +40,10 @@ recipeSchema = {
     prepTime: {
         required: false,
         type: String
+    },
+    tags: {
+        required: false,
+        type: [String]
     }
 }
 ``` 
@@ -86,7 +90,7 @@ const userSchema = {
 ## Get Endpoints
 ### Recipes
 - `/recipe/all`:
-    - requires an access token in the header: `authorization : Bearer <token>`
+    - does not require authorization header
     - no body is required
     - returns an array of all currently available recipes.
 - `/recipe/search`:
@@ -94,6 +98,10 @@ const userSchema = {
     - no body is required
     - requires a query term, ie `/api/recipe/search?term=spam`
     - returns all recipes whose title's match the term
+- `/recipe/id/:id`
+    - does not require auth token
+    - replace the `:id` at the end of the url with the id of the recipe you are searching for. For example `/recipe/id/63d18dab72444738921e3376`
+    - returns the result of the search, can be null if no recipes with that id are found
  - `/user/liked`:
     - requires access token in the header: `authorization : Bearer <token>`
     - no body is required
@@ -158,7 +166,11 @@ TODO:
 - `/user/like`:
     - requires an access token in the header: `authorization : Bearer <token>`
     - requires the id of the recipe to like in the body stored like `recipe : <id here>`
-    - returns status 200 if successful
+    - returns status 200 and the list of currently liked recipe ids if successful
+- `/user/dislike`:
+    - requires an access token in the header: `authorization : Bearer <token>`
+    - requires the id of the recipe to dislike in the body stored like `recipe : <id here>`
+    - returns status 200 and the list of currently liked recipe ids if successful
 
 
 ## Patch Endpoints

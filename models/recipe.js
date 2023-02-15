@@ -31,6 +31,10 @@ const recipeSchema = new mongoose.Schema({
     prepTime: {
         required: false,
         type: String
+    },
+    tags: {
+        required: false,
+        type: [String]
     }
 }, {
     collection : "recipes"
