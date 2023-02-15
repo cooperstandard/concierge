@@ -194,7 +194,7 @@ router.get("/user/liked", authenticateToken, async (req, res) => {
 
 
 router.post('/recipe', async (req, res) => {
-    console.log(req.body)
+    //console.log(req.body)
     const data = new Recipe({
         title: req.body.title,
         description: req.body.description,
@@ -240,11 +240,7 @@ router.post('/user/like', authenticateToken, async (req, res) => {
     try {
         liked = User.updateOne(
             { "_id": req.user.userId},
-            { "$push": { "saved": recipe } },
-            function (err, raw) {
-                if (err) return handleError(err);
-                console.log('The raw response from Mongo was ', raw);
-            }
+            { "$push": { "saved": recipe } }
          );
         
         res.status(200).json({message: "success"})
