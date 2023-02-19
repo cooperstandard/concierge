@@ -15,9 +15,10 @@
  * [X]: user/getLiked endpoint (get liked recipes)
  * [X]: user/refresh endpoint (refreshes an expired token)
  * [X]: save generated jwt to the users db entry
- * [ ]: tag support in post recipe
+ * [X]: tag support in post recipe
  * [X]: get recipe by id 
  * [ ]: get recipes by tag
+ * [ ]: consolidate token generation
  * [ ]: enable token expiration
  * [ ]: Enable Authentications
 */
@@ -75,24 +76,6 @@ function noAuthenticateToken(req,res,next) {
 }
 
 // SECTION: GET endpoints
-
-/* debug generate token 
-
-router.get('/generate', async (req,res) => {
-    try {
-        const username = req.body.username
-        const token = jwt.sign(username, conciergeSecret)
-
-        res.json({token})
-    }
-    catch (error) {
-        res.status(500).json({message: error.message})
-    }
-
-
-})
-/*
-*/
 
 //tests if the access token is valid
 router.get('/authenticate', async (req,res) => {
@@ -580,6 +563,18 @@ router.delete('/recipe/search', async (req, res) => {
         res.status(500).json({message: error.message})
     }
     //res.send('Delete by ID API')
+
+})
+
+router.delete('/recipe/id', async (req, res) => {
+    try {
+        const id = req.query.id
+        const data = await Recipe.findByIdAndDelete(id)
+        res.json(data)
+    } catch(error) {
+        res.status(500).json({message: error.message})
+    }
+
 
 })
 

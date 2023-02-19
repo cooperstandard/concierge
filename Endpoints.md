@@ -147,9 +147,6 @@ const userSchema = {
     ```
     - returns a json representation of the posted recipe
 
-TODO:
- - [ ]: Dislike Recipe
-
 
 ### Users
 - `/user/signup`
