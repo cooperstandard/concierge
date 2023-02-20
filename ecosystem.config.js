@@ -10,6 +10,7 @@ module.exports = {
           DATABASE_URL: process.env.DATABASE_URL,
           HOSTNAME: "concierge",
           PORT: 8443,
+          conciergeSecret: process.env.conciergeSecret
         },
       },
     ],
