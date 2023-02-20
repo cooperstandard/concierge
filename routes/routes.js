@@ -124,7 +124,7 @@ router.get('/recipe/id/:id', async (req, res) => {
         //console.log(update)
         
         const result = await Recipe.findById(req.params.id)
-        console.log(result)
+        //console.log(result)
         res.send(result)
 
 
