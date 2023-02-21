@@ -17,6 +17,7 @@
  * [X]: save generated jwt to the users db entry
  * [X]: tag support in post recipe
  * [X]: get recipe by id 
+ * [ ]: dislike and like input checking
  * [ ]: get recipes by tag
  * [ ]: consolidate token generation
  * [ ]: enable token expiration
