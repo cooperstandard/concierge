@@ -17,17 +17,36 @@
  * [X]: save generated jwt to the users db entry
  * [X]: tag support in post recipe
  * [X]: get recipe by id 
+ * [ ]: Real password storage
+ * [ ]: dislike doesnt actually remove the right things, it'll remove the last element of the array no matter what
  * [ ]: dislike and like input checking
  * [ ]: get recipes by tag
  * [ ]: consolidate token generation
  * [ ]: enable token expiration
  * [ ]: Enable Authentications
 */
+
 const express = require('express');
 const router = express.Router()
 const Recipe = require('../models/recipe');
 const User = require('../models/user');
 const jwt = require('jsonwebtoken');
+const bcrypt = require("bcrypt")
+
+// bcrypt.hash(plaintextPassword, 10, (err, hash) => {
+//     // store hash in the database
+// });
+
+
+
+// compare password
+
+
+// bcrypt.compare(plaintextPassword, hash, function(err, result) {
+//     if (result) {
+//         // password is valid
+//     }
+// });
 
 // PREDEPLOY: this needs to be a private environment variable before we accept actual user data
 const conciergeSecret = process.env.conciergeSecret;
@@ -299,6 +318,11 @@ router.post('/user/dislike', authenticateToken, async (req, res) => {
 
 })
 
+async function comparePassword(password, hash) {
+    const result = await bcrypt.compare(password, hash);
+    return result;
+}
+
 router.post('/user/login', async (req, res) => {
     let {email, password} = req.body
     let existingUser;
@@ -310,7 +334,10 @@ router.post('/user/login', async (req, res) => {
         res.status(500).json({message: error.message});
         return
     }
-    if (!existingUser || existingUser.password != password) {
+
+    let result = await comparePassword(password, existingUser.password)
+
+    if (!existingUser || !result) {
         res.status(401).json({message: "Wrong details please check at once"});
         return
     }
@@ -394,24 +421,31 @@ router.post("/user/signup", async (req, res) => {
         return
     }
     
-
-    var newUser = User({
-        name: name,
-        email: email,
-        password: password,
-        oldToken: "",
-        restrictions: [],
-        saved: []
-
-    });
+    let pwd;
+    let newUser;
 
     try {
+
+        pwd = await bcrypt.hash(password, 10);
+
+        newUser = User({
+            name: name,
+            email: email,
+            password: pwd,
+            oldToken: "",
+            restrictions: [],
+            saved: []
+    
+        });
         newUser = await newUser.save();
         
-    } catch {
-        const error = new Error("Error! Something went wrong.");
-        return next(error);
+    } catch (error) {
+        res.status(500).json({message: error.message})
+        return
     }
+    
+
+
 
     let token;
     try {
