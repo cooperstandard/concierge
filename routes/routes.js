@@ -347,7 +347,7 @@ router.post('/user/login', async (req, res) => {
         token = jwt.sign(
             {userId : existingUser.id, email: existingUser.email},
             conciergeSecret,
-            { }//expiresIn : "1h"}
+            { expiresIn : "1h"}
         );
     } catch(error) {
         console.log(error);
@@ -392,7 +392,7 @@ router.post("/user/refresh", async (req, res) => {
     newToken = jwt.sign(
         { userId: id, email: email },
         conciergeSecret,
-        { }//expiresIn: "1h" }
+        { expiresIn: "1h" }
     );
 
     await User.findByIdAndUpdate(id, {oldToken: newToken});
@@ -452,7 +452,7 @@ router.post("/user/signup", async (req, res) => {
         token = jwt.sign(
             { userId: newUser.id, email: newUser.email },
             conciergeSecret,
-            { }//expiresIn: "1h" }
+            { expiresIn: "1h" }
         );
     } catch (err) {
         const error = new Error("Error! Something went wrong.");
