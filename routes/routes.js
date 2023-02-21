@@ -417,7 +417,7 @@ router.post("/user/signup", async (req, res) => {
     }
 
     if(existingUser) {
-        res.status(401).json({message: "user account alread exists with that email"})
+        res.status(401).json({message: "user account already exists with that email"})
         return
     }
     
