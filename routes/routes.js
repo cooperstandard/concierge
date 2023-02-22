@@ -17,13 +17,13 @@
  * [X]: save generated jwt to the users db entry
  * [X]: tag support in post recipe
  * [X]: get recipe by id 
- * [ ]: Real password storage
- * [ ]: dislike doesnt actually remove the right things, it'll remove the last element of the array no matter what
- * [ ]: dislike and like input checking
+ * [X]: Real password storage
+ * [X]: dislike doesnt actually remove the right things, it'll remove the last element of the array no matter what
+ * [X]: dislike and like input checking
  * [ ]: get recipes by tag
  * [ ]: consolidate token generation
- * [ ]: enable token expiration
- * [ ]: Enable Authentications
+ * [X]: enable token expiration
+ * [X]: Enable Authentications
 */
 
 const express = require('express');
@@ -89,11 +89,13 @@ function authenticateToken(req, res, next) {
     })
     
 }
-
+/*
 function noAuthenticateToken(req,res,next) {
     req.user = "none"
     next()
 }
+*/
+
 
 // SECTION: GET endpoints
 
@@ -180,7 +182,7 @@ router.get('/recipe/demo', async (req, res) => {
 })
 
 // Search for recipe by title
-router.get('/recipe/search', noAuthenticateToken, async (req, res) => {
+router.get('/recipe/search', authenticateToken, async (req, res) => {
     try{
         const term = req.query.term;
         const data = await Recipe.find({"title" : term});
@@ -262,8 +264,13 @@ router.post('/user/like', authenticateToken, async (req, res) => {
     var liked = [...user.saved];
     liked.push(recipe)
     
+    
     try {
-        await User.updateOne(
+        console.log((await Recipe.findById(recipe)) === null)
+        if ((user.saved.findIndex(element => element === recipe) !== -1 || (await Recipe.findById(recipe)) === null)) {
+            throw new Error("recipe has already been liked")
+        }
+        user = await User.updateOne(
             { "_id": req.user.userId},
             { "$push": { "saved": recipe } },
             {"new" : true}
@@ -271,7 +278,7 @@ router.post('/user/like', authenticateToken, async (req, res) => {
         
         res.status(200).json({likedRecipes: liked})
     } catch (error) {
-        res.status(500).json({message: "failed to update"})
+        res.status(500).json({message: error.message})
         return
     }
 
@@ -296,7 +303,14 @@ router.post('/user/dislike', authenticateToken, async (req, res) => {
     }
 
     var liked = [...user.saved]
-    liked.splice(liked.indexOf(recipe), 1)
+    for(i = 0; i < liked.length; i++) {
+        if(liked[i] === recipe) {
+            liked.splice(i, 1)
+            break;
+            
+        }
+    }
+    //liked.filter(e => e !== recipe) 
 
     try {
         await User.updateOne(
@@ -304,7 +318,6 @@ router.post('/user/dislike', authenticateToken, async (req, res) => {
             { "$set": { "saved": liked }},
             {"new" : true}
          );
-        console.log(liked)
         res.status(200).json({likedRecipes: liked})
 
     } catch (error) {
