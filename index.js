@@ -49,6 +49,10 @@ app.use(express.json());
 //all endpoints start from /api
 app.use('/api', routes)
 
+app.listen(3000, () => {
+    console.log(`Server Started on port ${3000}`)
+})
+/*
 if (host != "concierge") {
     // if running on localhost
     app.listen(3000, () => {
@@ -68,6 +72,7 @@ if (host != "concierge") {
       });
 
 }
+*/
 
 
 
