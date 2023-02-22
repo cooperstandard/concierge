@@ -50,6 +50,7 @@ const bcrypt = require("bcrypt")
 
 // PREDEPLOY: this needs to be a private environment variable before we accept actual user data
 const conciergeSecret = process.env.conciergeSecret;
+console.log(conciergeSecret)
 //console.log(conciergeSecret)
 
 
@@ -75,8 +76,7 @@ function authenticateToken(req, res, next) {
         return res.sendStatus(401)
     } 
 
-    jwt.verify(token, conciergeSecret, (err, user) => { 
-        // PREDEPLOY: this
+    jwt.verify(token, conciergeSecret, (err, user) => {
         if (err) {
             console.log(err)
             return res.sendStatus(403)
