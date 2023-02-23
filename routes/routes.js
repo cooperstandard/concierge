@@ -215,6 +215,12 @@ router.get("/user/liked", authenticateToken, async (req, res) => {
 
 })
 
+router.get("/:other", async (req, res) => {
+    console.log(req.params.other)
+
+    res.sendStatus(404)
+})
+
 
 // SECTION: POST endpoints
 
