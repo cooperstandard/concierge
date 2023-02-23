@@ -1,13 +1,13 @@
 // Concierge: index.js
 // Cooper Standard 2022
 
-const fs = require('fs');
+//const fs = require('fs');
 const express = require('express');
 const mongoose = require('mongoose');
-const http = require('http');
-const https = require('https');
+//const http = require('http');
+//const https = require('https');
 const mongoString = process.env.DATABASE_URL;
-const host = process.env.HOSTNAME;
+//const host = process.env.HOSTNAME;
 const routes = require('./routes/routes.js');
 const recipeRoutes = require('./routes/recipeRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -41,7 +41,6 @@ app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT,PATCH,DELETE");
     res.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization");
-    console.log(req.url)
     next();
 });
 
