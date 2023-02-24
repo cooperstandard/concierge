@@ -175,19 +175,77 @@ router.get('/recipe/viewLiked', authenticateToken, async (req, res) => {
         res.status(500).json({message: "failed to find user"})
         return
     }
-    let recipes = {title: String, ingredients: [String]}
-    let saved = [...user.saved]
 
+    var recipes;
+
+    let saved = [...user.saved]
+    /*
     try {
-        for(const recipe in saved) {
+        
+        saved.map( async (recipe)=> {
             var result = await Recipe.findById(recipe)
-            recipes.push({title: result.title, ingredients: [...result.ingredients]})
-        }
+            console.log(result.title)
+            result = {title: result.title, ingredients: [...result.ingredients]}
+            //
+            recipes = result
+        })
+        console.log(recipes)
     } catch (error) {
+        console.log(error.message)
         res.status(500).json({message: "unable to get liked recipes, check ids"})
+        return
     }
 
-    res.status(200).json({recipes: recipes});
+    */
+    try {
+        recipes = await Recipe.find({
+            '_id': { $in: saved}
+        })
+        recipes = recipes.map(recipe => {
+            return({title: recipe.title, 
+                    ingredients: [...recipe.ingredients]})
+        })
+        res.status(200).json({recipes: recipes});
+
+    } catch (error) {
+        console.log(error.message)
+        res.status(500).json({message: "unable to get liked recipes, check ids"})
+        return
+    }
+
+    
+    /*
+    const myPromise = new Promise((resolve, reject) => {
+        function findByID(id) {
+            return Recipe.findById(id)
+        }
+
+        try {
+            var result =  Recipe.findById
+            for(const save in saved) {
+                var result = findByID(saved[save])
+                console.log(result.title)
+                result = {title: result.title, ingredients: [...result.ingredients]}
+                //
+                recipes = result
+            }
+
+
+            //console.log(recipes)
+        } catch (error) {
+            console.log(error.message)
+            res.status(500).json({message: "unable to get liked recipes, check ids"})
+            return
+        }
+    })
+
+    myPromise.then(() => {
+        console.log("sent")
+        res.status(200).json({recipes: recipes});
+
+    })
+    */
+    
 })
 /* 
 //https://concierge.cooperstandard.org/api/recipe/viewLiked
