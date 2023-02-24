@@ -96,6 +96,7 @@ function noAuthenticateToken(req,res,next) {
 */
 
 
+
 // SECTION: GET endpoints
 
 //tests if the access token is valid
@@ -157,6 +158,62 @@ router.get('/recipe/id/:id', async (req, res) => {
 
 
 })
+
+
+router.get('recipe/viewLiked', authenticateToken, async (req, res) => {
+    let user;
+
+    try {
+        user = await User.findOne({email: req.user.email})
+
+    } catch (error) {
+        res.status(500).json({message: "unknown error occured"})
+        return
+    }
+
+    if(!user) {
+        res.status(500).json({message: "failed to find user"})
+        return
+    }
+    let recipes = {title: String, ingredients: [String]}
+    let saved = [...user.saved]
+
+    try {
+        for(const recipe in saved) {
+            var result = await Recipe.findById(recipe)
+            recipes.push({title: result.title, ingredients: [...result.ingredients]})
+        }
+    } catch (error) {
+        res.status(500).json({message: "unable to get liked recipes, check ids"})
+    }
+
+    res.status(200).json({recipes: recipes});
+})
+/* 
+//https://concierge.cooperstandard.org/api/recipe/viewLiked
+
+[
+    {
+        "title" : "title here",
+        "ingredients" : [
+            "i1",
+            "i2"
+        ] 
+    },
+    {
+        "title" : "title here2",
+        "ingredients" : [
+            "i1",
+            "i2"
+        ] 
+    }
+
+
+]
+
+
+*/
+
 
 
 
