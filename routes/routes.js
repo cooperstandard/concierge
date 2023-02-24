@@ -160,7 +160,7 @@ router.get('/recipe/id/:id', async (req, res) => {
 })
 
 
-router.get('recipe/viewLiked', authenticateToken, async (req, res) => {
+router.get('/recipe/viewLiked', authenticateToken, async (req, res) => {
     let user;
 
     try {
