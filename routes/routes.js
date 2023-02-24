@@ -352,8 +352,16 @@ router.post('/user/login', async (req, res) => {
         res.status(500).json({message: error.message});
         return
     }
+    
+    let result;
 
-    let result = await comparePassword(password, existingUser.password)
+    if (!existinguser.password) {
+        result = false
+    } else {
+        result = await comparePassword(password, existingUser.password)
+
+    }
+        
 
     if (!existingUser || !result) {
         res.status(401).json({message: "Wrong details please check at once"});
