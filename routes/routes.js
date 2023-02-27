@@ -470,7 +470,7 @@ router.post('/user/login', async (req, res) => {
     
     let result;
 
-    if (!existingUser.password) {
+    if (!existingUser || existingUser.password === "") {
         result = false
     } else {
         result = await comparePassword(password, existingUser.password)
