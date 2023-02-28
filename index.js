@@ -22,7 +22,7 @@ Key is saved at:         /etc/letsencrypt/live/concierge.cooperstandard.org/priv
 
 mongoose.set('strictQuery', false);
 mongoose.connect(mongoString);
-console.log(mongoString)
+//console.log(mongoString)
 const database = mongoose.connection;
 
 database.on('error', (error) => {
