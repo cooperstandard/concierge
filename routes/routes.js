@@ -338,7 +338,8 @@ router.get("/:other", async (req, res) => {
 
 // SECTION: POST endpoints
 router.post('/message', async (req, res) => {
-    console.log(req.body)
+    console.log(req.params)
+    console.log(req)
     res.sendStatus(200)
 })
 
