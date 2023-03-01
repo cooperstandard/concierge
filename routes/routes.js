@@ -353,10 +353,11 @@ router.post('/recipe', async (req, res) => {
         allergens : req.body.allergens,
         prepTime : req.body.prepTime    
     });
-
+    
     try {
         const dataToSave = await data.save();
         console.log("posted " + data.title)
+        console.log(data)
         res.status(200).json(dataToSave);
         //console.log(data)
 
