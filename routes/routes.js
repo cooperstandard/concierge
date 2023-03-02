@@ -22,6 +22,9 @@
  * [X]: dislike and like input checking
  * [ ]: get recipes by tag
  * [ ]: consolidate token generation
+ * [ ]: user dislike list
+ * [ ]: feedback endpoint
+ * [ ]: reset password endpoint (integrate with email)
  * [X]: enable token expiration
  * [X]: Enable Authentications
 */
@@ -390,7 +393,7 @@ router.post('/user/like', authenticateToken, async (req, res) => {
     
     
     try {
-        console.log((await Recipe.findById(recipe)) === null)
+        //console.log((await Recipe.findById(recipe)) === null)
         if ((user.saved.findIndex(element => element === recipe) !== -1 || (await Recipe.findById(recipe)) === null)) {
             throw new Error("recipe has already been liked")
         }
