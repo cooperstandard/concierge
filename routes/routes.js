@@ -442,9 +442,11 @@ router.post('/user/dislike', authenticateToken, async (req, res) => {
     try {
         await User.updateOne(
             { "_id": req.user.userId},
-            { "$set": { "saved": liked }},
+            { "$set": { "saved": liked },
+              "$push": {"disliked": recipe}},
             {"new" : true}
          );
+         
         res.status(200).json({likedRecipes: liked})
 
     } catch (error) {
