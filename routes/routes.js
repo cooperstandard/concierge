@@ -255,7 +255,7 @@ router.get('/recipe/viewLiked', authenticateToken, async (req, res) => {
     
 })
 
-router.get('/recipe/viewDisliked', authenticateToken, async (req, res) => {
+router.get('/recipe/disliked', authenticateToken, async (req, res) => {
     let user;
 
     try {
