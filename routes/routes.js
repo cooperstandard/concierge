@@ -22,9 +22,12 @@
  * [X]: dislike and like input checking
  * [ ]: get recipes by tag
  * [ ]: consolidate token generation
- * [ ]: user dislike list
+ * [X]: user dislike list
  * [ ]: feedback endpoint
  * [ ]: reset password endpoint (integrate with email)
+ * [ ]: validate emails for signup and send an error 405 if the email is invalid
+ * [ ]: log logins and like/dislike
+ * [X]: get disliked
  * [X]: enable token expiration
  * [X]: Enable Authentications
 */
@@ -33,6 +36,7 @@ const express = require('express');
 const router = express.Router()
 const Recipe = require('../models/recipe');
 const User = require('../models/user');
+const Feedback = require('../models/feedback');
 const jwt = require('jsonwebtoken');
 const bcrypt = require("bcrypt")
 
@@ -250,6 +254,37 @@ router.get('/recipe/viewLiked', authenticateToken, async (req, res) => {
     */
     
 })
+
+router.get('/recipe/viewDisliked', authenticateToken, async (req, res) => {
+    let user;
+
+    try {
+        user = await User.findOne({email: req.user.email})
+
+    } catch (error) {
+        res.status(500).json({message: "unknown error occured"})
+        return
+    }
+
+    if(!user) {
+        res.status(500).json({message: "failed to find user"})
+        return
+    }
+
+    
+    
+    try {
+        let saved = [...user.disliked]
+        res.status(200).json({recipes: saved});
+
+    } catch (error) {
+        console.log(error.message)
+        res.status(500).json({message: "unable to get disliked recipes, check ids"})
+        return
+    }
+
+    
+})
 /* 
 //https://concierge.cooperstandard.org/api/recipe/viewLiked
 
@@ -340,9 +375,25 @@ router.get("/:other", async (req, res) => {
 
 
 // SECTION: POST endpoints
-router.post('/message', async (req, res) => {
-    console.log("message received")
-    res.sendStatus(200)
+router.post('/feedback', async (req, res) => {
+    const data = new Feedback({
+        author: req.body.author,
+        message: req.body.message,
+        date: Date.now().toString()
+    })
+
+    try {
+        const dataToSave = await data.save();
+        console.log("posted " + data.title)
+        console.log(data)
+        res.status(200).json(dataToSave);
+        //console.log(data)
+
+    } catch (error) {
+        
+        res.status(400).json({message: error.message})
+    }
+
 })
 
 router.post('/recipe', async (req, res) => {

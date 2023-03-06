@@ -39,7 +39,6 @@ const userSchema = new mongoose.Schema({
     collection : "users"
 });
 
-//TODO: add liked recipe storage, array of _id
 
 
 module.exports = mongoose.model('User', userSchema)
