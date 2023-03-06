@@ -23,7 +23,7 @@
  * [ ]: get recipes by tag
  * [ ]: consolidate token generation
  * [X]: user dislike list
- * [ ]: feedback endpoint
+ * [X]: feedback endpoint
  * [ ]: reset password endpoint (integrate with email)
  * [ ]: validate emails for signup and send an error 405 if the email is invalid
  * [ ]: log logins and like/dislike
@@ -37,6 +37,7 @@ const router = express.Router()
 const Recipe = require('../models/recipe');
 const User = require('../models/user');
 const Feedback = require('../models/feedback');
+const Log = require('../models/log');
 const jwt = require('jsonwebtoken');
 const bcrypt = require("bcrypt")
 
