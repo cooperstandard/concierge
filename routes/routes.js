@@ -1,9 +1,6 @@
 // Concierge: routes.js
 // Cooper Standard 2023
 
-//TODO: split recipe and user routes to seperate files
-//TODO: Description for each endpoint
-
 /* TODO:
  * [X]: User log in
  * [X]: Patch recipe by title
@@ -20,13 +17,12 @@
  * [X]: Real password storage
  * [X]: dislike doesnt actually remove the right things, it'll remove the last element of the array no matter what
  * [X]: dislike and like input checking
- * [ ]: get recipes by tag
- * [ ]: consolidate token generation
  * [X]: user dislike list
  * [X]: feedback endpoint
  * [ ]: reset password endpoint (integrate with email)
  * [ ]: validate emails for signup and send an error 405 if the email is invalid
- * [ ]: log logins and like/dislike
+ * [X]: log logins and like/dislike
+ * [X]: update pdf
  * [X]: get disliked
  * [X]: enable token expiration
  * [X]: Enable Authentications
@@ -41,38 +37,8 @@ const Log = require('../models/log');
 const jwt = require('jsonwebtoken');
 const bcrypt = require("bcrypt")
 
-// bcrypt.hash(plaintextPassword, 10, (err, hash) => {
-//     // store hash in the database
-// });
-
-
-
-// compare password
-
-
-// bcrypt.compare(plaintextPassword, hash, function(err, result) {
-//     if (result) {
-//         // password is valid
-//     }
-// });
-
-// PREDEPLOY: this needs to be a private environment variable before we accept actual user data
 const conciergeSecret = process.env.conciergeSecret;
-//console.log(conciergeSecret)
 
-
-
-function generateAccessToken(username, name) {
-    //TODO: use this
-    /*
-    const options = {expiresIn: "600s"} 
-    return jwt.sign(username, conciergeSecret, options)
-    */
-    return jwt.sign({userid: 1, email: username}, conciergeSecret)
-
-
-}
-//this is an example comment
 
 function authenticateToken(req, res, next) {
     
@@ -96,12 +62,7 @@ function authenticateToken(req, res, next) {
     })
     
 }
-/*
-function noAuthenticateToken(req,res,next) {
-    req.user = "none"
-    next()
-}
-*/
+
 
 
 
@@ -118,9 +79,6 @@ router.get('/authenticate', async (req,res) => {
         
 
         jwt.verify(token, conciergeSecret, (err, user) => {
-        //console.log(err)
-        // PREDEPLOY: this
-        //if (err) return res.sendStatus(403)
 
             if (err) {
                 console.log(err)
@@ -187,24 +145,7 @@ router.get('/recipe/viewLiked', authenticateToken, async (req, res) => {
     var recipes;
 
     let saved = [...user.saved]
-    /*
-    try {
-        
-        saved.map( async (recipe)=> {
-            var result = await Recipe.findById(recipe)
-            console.log(result.title)
-            result = {title: result.title, ingredients: [...result.ingredients]}
-            //
-            recipes = result
-        })
-        console.log(recipes)
-    } catch (error) {
-        console.log(error.message)
-        res.status(500).json({message: "unable to get liked recipes, check ids"})
-        return
-    }
-
-    */
+    
     try {
         recipes = await Recipe.find({
             '_id': { $in: saved}
@@ -221,38 +162,6 @@ router.get('/recipe/viewLiked', authenticateToken, async (req, res) => {
         return
     }
 
-    
-    /*
-    const myPromise = new Promise((resolve, reject) => {
-        function findByID(id) {
-            return Recipe.findById(id)
-        }
-
-        try {
-            var result =  Recipe.findById
-            for(const save in saved) {
-                var result = findByID(saved[save])
-                console.log(result.title)
-                result = {title: result.title, ingredients: [...result.ingredients]}
-                //
-                recipes = result
-            }
-
-
-            //console.log(recipes)
-        } catch (error) {
-            console.log(error.message)
-            res.status(500).json({message: "unable to get liked recipes, check ids"})
-            return
-        }
-    })
-
-    myPromise.then(() => {
-        console.log("sent")
-        res.status(200).json({recipes: recipes});
-
-    })
-    */
     
 })
 
@@ -653,29 +562,8 @@ router.post("/user/signup", async (req, res) => {
 
 })
 
-//Post Method
 
-/*
-router.post('/user', async (req, res) => {
-    const data = new User({
-        name : req.body.name,
-        restrictions : req.body.restrictions,
-        email : req.body.email,
-        jwt: generateAccessToken(req.body.email)
-            
-    });
 
-    try {
-        const dataToSave = await data.save();
-        res.status(200).json(dataToSave)
-        //console.log(data)
-
-    } catch (error) {
-        
-        res.status(400).json({message: error.message})
-    }
-})
-*/
 
 // SECTION: PATCH endpoints
 
@@ -746,7 +634,7 @@ router.patch('/user/email/:email', async (req, res) => {
 // SECTION: DELETE endpoints
 
 // Delete all
-//TODO: this is intentionally broken
+//NOTES: this is intentionally broken because someone accidentally called it once
 router.delete('/recipe/all', async (req, res) => {
     try {
         const data = await Recipe.deleteMany({title: "none"});
