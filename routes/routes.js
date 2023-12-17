@@ -86,9 +86,6 @@ router.get('/authenticate', async (req,res) => {
             } else {
                 res.json({message: "verification successful", user: user})
             }
-
-            
-
         })
     } catch(error) {
         res.status(405).json({message: error.message})
@@ -523,9 +520,6 @@ router.post("/user/signup", async (req, res) => {
         return
     }
     
-
-
-
     let token;
     try {
         token = jwt.sign(
@@ -545,9 +539,6 @@ router.post("/user/signup", async (req, res) => {
         return
     }
     
-
-
-    
     res
         .status(201)
         .json({
@@ -558,7 +549,6 @@ router.post("/user/signup", async (req, res) => {
                 token: token
             },
         });
-
 
 })
 
